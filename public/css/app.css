@@ -217,3 +217,11 @@ details > summary { cursor: pointer; color: var(--muted); font-size: 14px; }
 :root[data-theme="light"] .bar > i { background: var(--chart-1); }
 :root[data-theme="light"] mark { background: rgba(227, 93, 5, 0.16); color: #8A3600; }
 :root[data-theme="light"] pre.doctext { background: var(--surface-2); }
+
+/* 프로필 전환 — 여러 프로필이 있을 때만 보인다 */
+.pswitch { display: flex; align-items: center; }
+.pswitch select {
+  font-size: 13px; padding: 5px 9px; border-radius: 8px; max-width: 150px;
+  background: var(--surface-2); border: 1px solid var(--line); color: var(--text);
+}
+.pswitch select:hover { border-color: var(--accent); }

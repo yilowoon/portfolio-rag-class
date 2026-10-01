@@ -109,9 +109,33 @@ npm run seed && npm run index:activities && npm start
 
 ---
 
-## 5. 내 자료로 바꾸기
+## 5. 프로필 여러 개 두기
 
-### 5-1. 프로필 입력
+`data/` 안의 `.db` 파일 하나가 프로필 하나입니다. 두 개 이상이면 **우측 상단에 선택기**가 나타나
+화면에서 오갈 수 있습니다.
+
+예시는 그대로 두고 내 프로필을 따로 만들려면:
+
+```bash
+set DB_PATH=data/mine.db
+```
+
+```bash
+npm run seed
+```
+
+(macOS·Linux 는 `DB_PATH=data/mine.db npm run seed`)
+
+이렇게 하면 `portfolio.db`(예시)와 `mine.db`(내 것)를 비교하며 작업할 수 있습니다.
+선택은 `data/current.txt` 에 남아 서버를 다시 띄워도 유지됩니다.
+
+> 프로필을 바꾸면 임베딩 행렬 같은 메모리 캐시도 함께 비워집니다.
+> `src/db.js` 의 `switchTo()` 와 `onSwitch()` 가 그 일을 합니다 — 캐시가 있는 시스템에서
+> 데이터 출처가 바뀔 때 무엇을 신경 써야 하는지 보여주는 예입니다.
+
+## 6. 내 자료로 바꾸기
+
+### 6-1. 프로필 입력
 
 두 가지 방법이 있습니다.
 
@@ -124,7 +148,7 @@ npm run seed && npm run index:activities && npm start
 npm run seed -- --reset && npm run index:activities
 ```
 
-### 5-2. 원본 자료 넣기
+### 6-2. 원본 자료 넣기
 
 `myprofile/` 폴더에 이력서·자기소개서·수상 증빙 등을 넣습니다.
 pdf · hwp · hwpx · docx · pptx · xlsx · txt 를 읽습니다.
@@ -136,7 +160,7 @@ npm run ingest
 > **이 폴더는 저장소에 올라가지 않습니다**(`.gitignore`). 개인정보가 들어가기 때문입니다.
 > 과제를 제출할 때도 코드만 올라갑니다.
 
-### 5-3. 민감정보 자동 마스킹
+### 6-3. 민감정보 자동 마스킹
 
 경력증명서 같은 증빙에는 주민등록번호가 그대로 있는 경우가 많습니다.
 `src/redact.js` 가 **DB에 저장하기 전에** 주민등록번호·여권번호를 가립니다. 원본 파일은 건드리지 않습니다.
@@ -148,7 +172,7 @@ npm run ingest
 
 ---
 
-## 6. AI 기능 켜기 (선택)
+## 7. AI 기능 켜기 (선택)
 
 [Google AI Studio](https://aistudio.google.com/apikey) 에서 무료 키를 받습니다.
 
@@ -169,7 +193,7 @@ npm run embed
 
 ---
 
-## 7. 기업 데이터 (선택)
+## 8. 기업 데이터 (선택)
 
 [OpenDART](https://opendart.fss.or.kr) 에서 무료 인증키를 받으면 공시 기업 정보를 받아올 수 있습니다.
 
@@ -185,7 +209,7 @@ npm run dart enrich -- --listed   # 상장사 개황 (회사당 1회)
 
 ---
 
-## 8. 명령어 정리
+## 9. 명령어 정리
 
 ```bash
 npm run seed                 # 예시(또는 내) 프로필 심기
@@ -205,7 +229,7 @@ npm run sync                 # 위 과정을 한 번에 + 커밋·푸시
 
 ---
 
-## 9. 생각해 볼 거리
+## 10. 생각해 볼 거리
 
 - 청크를 900자가 아니라 300자로 하면 검색 결과가 어떻게 달라질까? (`src/chunk.js`)
 - 키워드와 의미검색의 비중을 바꾸려면 어디를 손대야 할까? (`src/search.js` 의 `fuse`)

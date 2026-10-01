@@ -4,6 +4,7 @@ node_modules/
 
 # SQLite 작업 파일
 data/*.db
+data/current.txt
 data/*.db-*
 data/cache/
 

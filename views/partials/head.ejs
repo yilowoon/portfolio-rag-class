@@ -39,6 +39,16 @@
       <a href="/health" class="<%= path === '/health' ? 'on' : '' %>">수집상태</a>
     </nav>
     <div class="spacer"></div>
+    <% if (typeof profiles !== 'undefined' && profiles.length > 1) { %>
+      <form method="post" action="/profiles/switch" class="pswitch" title="보고 있는 프로필">
+        <input type="hidden" name="back" value="<%= path %>">
+        <select name="file" onchange="this.form.submit()" aria-label="프로필 선택">
+          <% profiles.forEach(function (p) { %>
+            <option value="<%= p.file %>" <%= p.current ? 'selected' : '' %>><%= p.name %></option>
+          <% }) %>
+        </select>
+      </form>
+    <% } %>
     <a href="/cover" class="navcta <%= path.startsWith('/cover') ? 'on' : '' %>">자기소개서</a>
     <button type="button" id="themeToggle" class="themebtn" aria-pressed="false"
             title="화면 모드 전환" aria-label="화면 모드 전환">

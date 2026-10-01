@@ -15,7 +15,8 @@
     "dart": "node scripts/dart-sync.js",
     "stats": "node scripts/stats.js",
     "index:activities": "node scripts/index-activities.js",
-    "sync": "node scripts/sync.js"
+    "sync": "node scripts/sync.js",
+    "seed:sample": "node scripts/seed-sample.js"
   },
   "engines": {
     "node": ">=22.5.0"

@@ -12,7 +12,7 @@
  */
 const fs = require("fs");
 const path = require("path");
-const { db } = require("./db");
+const { db, onSwitch } = require("./db");
 
 const AXES = ["기술개발", "정책공공", "창업투자", "글로벌", "연구학술", "경영리더십"];
 
@@ -244,6 +244,7 @@ function tipsFor(gapList, limit = 3) {
  * 내 역량이 바뀌면 키가 달라져 자동으로 다시 계산된다.
  */
 const _evalCache = new Map();
+onSwitch(() => _evalCache.clear());
 
 function industryEval(indutyCode, my) {
   const ind = industryOf(indutyCode);

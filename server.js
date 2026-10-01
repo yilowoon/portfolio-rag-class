@@ -16,6 +16,10 @@ const stats = require("./src/stats");
 const { CATEGORIES, PROFILE_KINDS, byCategory, byYear, timeline, coverage } = require("./src/portfolio");
 const comp = require("./src/competency");
 const cover = require("./src/cover");
+const profiles = require("./src/profiles");
+
+/* 지난번에 고른 프로필로 복원한다 */
+profiles.restore();
 
 const app = express();
 app.set("view engine", "ejs");
@@ -80,7 +84,22 @@ app.use((req, res, next) => {
   res.locals.nav = true;
   res.locals.hasKey = gemini.enabled();
   res.locals.path = req.path;
+  try {
+    res.locals.profiles = profiles.list();
+  } catch (_) {
+    res.locals.profiles = [];
+  }
   next();
+});
+
+/* 프로필 전환 — 열려 있는 DB 파일을 바꾼다 */
+app.post("/profiles/switch", (req, res) => {
+  try {
+    profiles.select(req.body.file);
+  } catch (e) {
+    console.warn("프로필 전환 실패:", e.message);
+  }
+  res.redirect(req.body.back || "/");
 });
 
 const nowISO = () => new Date().toISOString();

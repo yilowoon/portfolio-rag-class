@@ -6,6 +6,8 @@ const { DatabaseSync } = require("node:sqlite");
 const { DB_PATH } = require("./config");
 
 let _db = null;
+let _dbFile = DB_PATH;
+const _onSwitch = []; // DB 가 바뀔 때 캐시를 비워야 하는 모듈들이 등록한다
 
 const SCHEMA = `
 PRAGMA journal_mode = WAL;
@@ -217,11 +219,39 @@ CREATE TABLE IF NOT EXISTS ask_log (
 
 function db() {
   if (_db) return _db;
-  fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
-  _db = new DatabaseSync(DB_PATH);
+  fs.mkdirSync(path.dirname(_dbFile), { recursive: true });
+  _db = new DatabaseSync(_dbFile);
   _db.exec(SCHEMA);
   return _db;
 }
+
+const currentFile = () => _dbFile;
+
+/*
+ * 열려 있는 DB 를 다른 파일로 바꾼다.
+ * 프로필 하나 = SQLite 파일 하나라는 구조를 그대로 살린 방식이라,
+ * 테이블마다 profile_id 를 달고 모든 질의를 고치는 것보다 손댈 곳이 적다.
+ *
+ * 주의: 모듈 수준 캐시(임베딩 행렬 등)는 이전 DB 의 내용이므로 반드시 비운다.
+ */
+function switchTo(file) {
+  const next = path.resolve(file);
+  if (next === path.resolve(_dbFile) && _db) return _db;
+  if (_db) {
+    try { _db.prepare("PRAGMA wal_checkpoint(TRUNCATE)").get(); } catch (_) {}
+    try { _db.close(); } catch (_) {}
+    _db = null;
+  }
+  _dbFile = next;
+  const handle = db();
+  for (const fn of _onSwitch) {
+    try { fn(); } catch (_) {}
+  }
+  return handle;
+}
+
+/* 캐시를 가진 모듈이 전환 시 호출받도록 등록한다 */
+const onSwitch = (fn) => { _onSwitch.push(fn); };
 
 /* chunks ↔ chunks_fts 동기화(외부 콘텐츠 테이블이므로 수동 관리) */
 function ftsInsert(chunkId, text) {
@@ -233,4 +263,4 @@ function ftsDeleteDoc(docId) {
   for (const r of rows) del.run(r.id, r.text);
 }
 
-module.exports = { db, ftsInsert, ftsDeleteDoc };
+module.exports = { db, ftsInsert, ftsDeleteDoc, currentFile, switchTo, onSwitch };

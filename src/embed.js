@@ -4,7 +4,7 @@
  * GEMINI_API_KEY 가 있으면 청크를 벡터로 바꿔 저장하고, 질의도 같은 방식으로 벡터화한다.
  * 키가 없으면 모든 함수가 조용히 비활성 상태로 동작하고, 검색은 키워드만으로 돌아간다.
  */
-const { db } = require("./db");
+const { db, onSwitch } = require("./db");
 const { gemini } = require("./config");
 
 let _cache = null; // { ids: Int32Array, dim, mat: Float32Array }
@@ -28,6 +28,9 @@ function hasEmbeddings() {
 function invalidateCache() {
   _cache = null;
 }
+
+/* 프로필을 바꾸면 이 행렬은 이전 DB 의 벡터다 — 반드시 버린다 */
+onSwitch(invalidateCache);
 
 /* 전체 벡터를 하나의 Float32Array 로 올려 코사인 유사도를 계산한다(수만 건까지 충분). */
 function loadMatrix() {
