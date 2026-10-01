@@ -1,0 +1,108 @@
+<%- include('partials/head') %>
+<h1>포트폴리오 체계화 DB</h1>
+<p class="sub">
+  <% if (me.name) { %><strong><%= me.name %></strong>님의 <% } %>프로필 자료를 색인해 검색·정리하는 작업대입니다.
+  <% if (ov.lastRun) { %>마지막 수집 <%= new Date(ov.lastRun).toLocaleString('ko-KR') %><% } %>
+</p>
+
+<div class="grid c4">
+  <div class="card stat"><div class="n"><%= ov.docs.toLocaleString() %></div><div class="l">문서의 숫자</div></div>
+  <div class="card stat"><div class="n"><%= ov.chunks.toLocaleString() %></div><div class="l">검색 청크</div></div>
+  <div class="card stat"><div class="n"><%= ov.chars.toLocaleString() %></div><div class="l">추출 글자수</div></div>
+  <div class="card stat"><div class="n"><%= ov.embeddings ? ov.embeddings.toLocaleString() : '—' %></div><div class="l">임베딩(벡터)</div></div>
+</div>
+
+<form class="search" action="/search" method="get" style="margin-top:18px">
+  <input type="search" name="q" class="grow" placeholder="예: 펀드 조성, IPTV 개발, 지역산업정책, ESG 자격">
+  <button type="submit">검색</button>
+  <a class="btn ghost" href="/ask">질의응답으로</a>
+</form>
+
+<div class="card prog">
+  <div class="row">
+    <div>
+      <h2 style="margin:0">포트폴리오 체계화 진행</h2>
+      <p class="muted small" style="margin:4px 0 0">
+        활동 <b><%= cover.total %></b>건 정리됨 ·
+        <%= cover.items.filter(function (i) { return i.count > 0; }).length %>/<%= cover.items.length %> 분야 채움
+        <% if (cover.missing.length) { %> · 비어 있는 분야: <span class="warnmuted"><%= cover.missing.join(', ') %></span><% } %>
+      </p>
+    </div>
+    <div class="right row">
+      <a class="btn" href="/portfolio">포트폴리오 열기</a>
+      <a class="btn ghost" href="/profile">이력서 보기</a>
+    </div>
+  </div>
+  <div class="prog-bars">
+    <% cover.items.forEach(function (c) { %>
+      <a href="/portfolio?cat=<%= encodeURIComponent(c.key) %>" class="pb <%= c.count ? '' : 'off' %>">
+        <span class="pb-n"><%= c.count %></span>
+        <span class="pb-k"><%= c.key %></span>
+        <span class="pb-s <%= c.status === '확보' ? 'ok' : c.status === '근거부족' ? 'warn' : 'bad' %>"><%= c.status %></span>
+      </a>
+    <% }) %>
+  </div>
+</div>
+
+<div class="grid c2">
+  <div class="card">
+    <h2 style="margin-top:0">활동별</h2>
+    <table>
+      <% var maxC = Math.max.apply(null, cats.map(function (r) { return r.count; }).concat([1])); %>
+      <% cats.forEach(function (r) { %>
+      <tr>
+        <td style="width:42%"><a href="/portfolio?cat=<%= encodeURIComponent(r.key) %>"><%= r.icon %> <%= r.key %></a></td>
+        <td><div class="bar"><i style="width:<%= Math.round(r.count / maxC * 100) %>%"></i></div></td>
+        <td class="num" style="width:50px"><%= r.count %></td>
+      </tr>
+      <% }) %>
+    </table>
+  </div>
+  <div class="card">
+    <h2 style="margin-top:0">문서 유형</h2>
+    <table>
+      <% var maxT = Math.max.apply(null, byType.map(function (r) { return r.c; }).concat([1])); %>
+      <% byType.forEach(function (r) { %>
+      <tr>
+        <td style="width:42%"><a href="/docs?type=<%= encodeURIComponent(r.k || '') %>"><%= r.k || '기타' %></a></td>
+        <td><div class="bar"><i style="width:<%= Math.round(r.c / maxT * 100) %>%"></i></div></td>
+        <td class="num" style="width:50px"><%= r.c %></td>
+      </tr>
+      <% }) %>
+    </table>
+  </div>
+</div>
+
+<% if (yc.data.length) { %>
+<div class="card" style="margin-top:14px">
+  <h2 style="margin-top:0">연도별 활동 분포</h2>
+  <%- include('partials/yearchart', { yc: yc }) %>
+</div>
+<% } %>
+
+<div class="grid c2" style="margin-top:14px">
+  <div class="card">
+    <h2 style="margin-top:0">최근 자료</h2>
+    <table>
+      <% recent.forEach(function (r) { %>
+      <tr><td><a href="/doc/<%= r.id %>"><%= r.title %></a>
+        <div class="muted small"><%= r.doc_type %> · <%= r.year || '연도미상' %></div></td></tr>
+      <% }) %>
+      <% if (!recent.length) { %><tr><td class="empty small">수집된 자료가 없습니다.</td></tr><% } %>
+    </table>
+  </div>
+  <div class="card">
+    <h2 style="margin-top:0">분량이 큰 자료</h2>
+    <table>
+      <% biggest.forEach(function (r) { %>
+      <tr>
+        <td><a href="/doc/<%= r.id %>"><%= r.title %></a>
+          <div class="muted small"><%= r.doc_type %></div></td>
+        <td class="num muted small"><%= r.text_chars ? r.text_chars.toLocaleString() + '자' : '-' %></td>
+      </tr>
+      <% }) %>
+      <% if (!biggest.length) { %><tr><td class="empty small">수집된 자료가 없습니다.</td></tr><% } %>
+    </table>
+  </div>
+</div>
+<%- include('partials/foot') %>

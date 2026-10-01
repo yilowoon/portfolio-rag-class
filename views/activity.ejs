@@ -1,0 +1,65 @@
+<%- include('partials/head') %>
+<h1><%= a.id ? a.title : '활동 추가' %></h1>
+<p class="sub">
+  <a href="/portfolio">포트폴리오</a>
+  <% if (a.category) { %> › <a href="/portfolio?cat=<%= encodeURIComponent(a.category) %>"><%= a.category %></a><% } %>
+</p>
+
+<form method="post" action="<%= a.id ? '/portfolio/' + a.id : '/portfolio' %>" class="card">
+  <div class="grid c2">
+    <div><label class="f">제목</label><input type="text" name="title" style="width:100%" value="<%= a.title || '' %>" required></div>
+    <div><label class="f">분류</label>
+      <select name="category" style="width:100%">
+        <% categories.forEach(function (c) { %><option value="<%= c %>" <%= a.category === c ? 'selected' : '' %>><%= c %></option><% }) %>
+      </select></div>
+    <div><label class="f">기관</label><input type="text" name="org" style="width:100%" value="<%= a.org || '' %>"></div>
+    <div><label class="f">역할</label><input type="text" name="role" style="width:100%" value="<%= a.role || '' %>"></div>
+    <div><label class="f">시작 (YYYY 또는 YYYY-MM)</label><input type="text" name="period_start" style="width:100%" value="<%= a.period_start || '' %>"></div>
+    <div><label class="f">종료 (비우면 '현재')</label><input type="text" name="period_end" style="width:100%" value="<%= a.period_end || '' %>"></div>
+  </div>
+  <label class="f">요약</label><textarea name="summary"><%= a.summary || '' %></textarea>
+  <label class="f">성과 — 여러 개면 " / " 로 구분하면 목록으로 표시됩니다</label>
+  <textarea name="outcomes"><%= a.outcomes || '' %></textarea>
+  <label class="f">태그(쉼표)</label><input type="text" name="tags" style="width:100%" value="<%= a.tags || '' %>">
+  <div class="row" style="margin-top:12px">
+    <label class="row small muted" style="gap:6px"><input type="checkbox" name="featured" value="1" <%= a.featured ? 'checked' : '' %>> 대표 활동</label>
+    <select name="visibility">
+      <option value="private" <%= a.visibility === 'private' ? 'selected' : '' %>>비공개</option>
+      <option value="public" <%= a.visibility === 'public' ? 'selected' : '' %>>공개 가능</option>
+    </select>
+    <button type="submit"><%= a.id ? '저장' : '추가' %></button>
+    <a class="btn ghost right" href="/portfolio">목록</a>
+  </div>
+</form>
+
+<% if (a.id) { %>
+<div class="card" style="margin-top:14px">
+  <div class="row" style="margin-bottom:10px">
+    <h2 style="margin:0">근거 자료 (<%= docs.length %>)</h2>
+    <form method="post" action="/portfolio/<%= a.id %>/docs" class="right row">
+      <select name="doc_id">
+        <% allDocs.forEach(function (d) { %><option value="<%= d.id %>"><%= d.title %></option><% }) %>
+      </select>
+      <button type="submit" <%= allDocs.length ? '' : 'disabled' %>>연결</button>
+    </form>
+  </div>
+  <table>
+    <% docs.forEach(function (d) { %>
+    <tr>
+      <td><a href="/doc/<%= d.id %>"><%= d.title %></a>
+        <div class="muted small"><%= d.doc_type %> · <%= d.year || '연도미상' %> · <%= d.ext %></div></td>
+      <td style="width:80px" class="num">
+        <form method="post" action="/portfolio/<%= a.id %>/docs/<%= d.id %>/remove"><button class="ghost small" type="submit">해제</button></form>
+      </td>
+    </tr>
+    <% }) %>
+    <% if (!docs.length) { %><tr><td class="empty small">연결된 자료가 없습니다. 위에서 선택해 연결하세요.</td></tr><% } %>
+  </table>
+</div>
+
+<form method="post" action="/portfolio/<%= a.id %>/delete" style="margin-top:14px"
+      onsubmit="return confirm('이 활동을 삭제할까요? 원본 자료는 지워지지 않습니다.')">
+  <button class="danger" type="submit">활동 삭제</button>
+</form>
+<% } %>
+<%- include('partials/foot') %>

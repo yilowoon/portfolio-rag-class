@@ -1,0 +1,75 @@
+{
+  "_comment": "수집 대상: 프로젝트 안의 myprofile 폴더만. 자료가 부족하면 myprofile/rawdata 에 파일을 넣고 다시 수집하면 된다.",
+  "workRoot": "./myprofile",
+  "sources": [
+    {
+      "path": ".",
+      "org": "프로필",
+      "orgType": "본인",
+      "maxDepth": 1
+    },
+    {
+      "path": "rawdata",
+      "org": "추가자료",
+      "orgType": "본인"
+    }
+  ],
+  "excludeDirs": [
+    "node_modules",
+    ".git"
+  ],
+  "_excludeNameComment": "프로필 폴더라 대부분 수집 대상이지만, 금융·인증 관련 파일만 안전장치로 막아둔다.",
+  "excludeName": [
+    "잔고증명",
+    "재무제표",
+    "통장",
+    "계좌",
+    "비밀번호",
+    "password",
+    "private_key",
+    "privatekey",
+    "mnemonic",
+    "시드문구"
+  ],
+  "skipFilePrefixes": [
+    "~$",
+    "."
+  ],
+  "skipExt": [
+    ".bak",
+    ".$$$",
+    ".tmp",
+    ".log",
+    ".lnk",
+    ".url",
+    ".ini",
+    ".db",
+    ".exe",
+    ".zip"
+  ],
+  "textExt": [
+    ".pdf",
+    ".hwp",
+    ".hwpx",
+    ".docx",
+    ".pptx",
+    ".xlsx",
+    ".txt",
+    ".md",
+    ".csv"
+  ],
+  "mediaExt": [
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".gif",
+    ".webp",
+    ".svg",
+    ".mp3",
+    ".wav",
+    ".mp4",
+    ".mov"
+  ],
+  "maxFileSizeMB": 80,
+  "preferPdfOverHwp": true
+}

@@ -1,0 +1,51 @@
+<%- include('partials/head') %>
+<h1><%= doc.title %></h1>
+<p class="sub">
+  <%= doc.doc_type %> · <%= doc.year || '연도미상' %> · <%= doc.ext %>
+  · <%= doc.text_chars ? doc.text_chars.toLocaleString() + '자 / ' + doc.chunk_count + '청크' : '본문 없음' %>
+  <% if (doc.status !== 'ok') { %> <span class="pill bad"><%= doc.status %></span><% } %>
+  <% if (doc.redacted) { %> <span class="pill warn">마스킹: <%= doc.redacted %></span><% } %>
+</p>
+<p class="muted small" style="margin-top:-10px"><%= doc.rel_path %></p>
+
+<div class="row" style="margin:10px 0 16px">
+  <% if (exists) { %><a class="btn ghost" href="/doc/<%= doc.id %>/file">원본 내려받기</a><% } else { %><span class="pill bad">원본 파일 없음</span><% } %>
+  <a class="btn ghost" href="/docs">자료 목록</a>
+</div>
+
+<% if (doc.kind === 'media' && exists) { %>
+  <div class="card" style="margin-bottom:14px;text-align:center">
+    <img src="/doc/<%= doc.id %>/raw" alt="<%= doc.title %>" style="max-width:100%;border-radius:8px">
+  </div>
+<% } %>
+
+<div class="card">
+  <div class="row" style="margin-bottom:10px">
+    <h2 style="margin:0">포트폴리오 연결</h2>
+    <form method="post" action="/doc/<%= doc.id %>/link" class="right row">
+      <select name="activity_id">
+        <% activities.forEach(function (a) { %><option value="<%= a.id %>">[<%= a.category %>] <%= a.title %></option><% }) %>
+      </select>
+      <button type="submit" <%= activities.length ? '' : 'disabled' %>>연결</button>
+    </form>
+  </div>
+  <% if (links.length) { %>
+    <div class="chips">
+      <% links.forEach(function (l) { %><a class="chip on" href="/portfolio/<%= l.id %>"><%= l.category %> · <%= l.title %></a><% }) %>
+    </div>
+  <% } else { %>
+    <p class="muted small" style="margin:0">아직 연결된 활동이 없습니다.</p>
+  <% } %>
+</div>
+
+<% if (doc.error) { %><p class="err" style="margin-top:12px"><%= doc.error %></p><% } %>
+
+<% if (doc.kind !== 'media') { %>
+<h2>추출 본문</h2>
+<% if (text) { %>
+  <pre class="doctext"><%= text %></pre>
+<% } else { %>
+  <div class="card empty">본문 텍스트가 없습니다(스캔 이미지이거나 추출 실패).</div>
+<% } %>
+<% } %>
+<%- include('partials/foot') %>

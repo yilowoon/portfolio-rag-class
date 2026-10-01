@@ -1,0 +1,50 @@
+<%- include('partials/head') %>
+<h1>수집 상태</h1>
+<p class="sub">어떤 자료가 어떻게 들어왔는지 점검합니다. 자료가 부족하면 <code>myprofile/rawdata/</code> 에 넣고 다시 수집하세요.</p>
+
+<div class="grid c4">
+  <div class="card stat"><div class="n"><%= ov.ok.toLocaleString() %></div><div class="l">정상</div></div>
+  <div class="card stat"><div class="n"><%= ov.empty %></div><div class="l">본문 없음</div></div>
+  <div class="card stat"><div class="n"><%= ov.failed %></div><div class="l">추출 실패</div></div>
+  <div class="card stat"><div class="n"><%= ov.media.toLocaleString() %></div><div class="l">이미지·미디어</div></div>
+</div>
+
+<% if (redacted.length) { %>
+<div class="card" style="margin-top:14px">
+  <h2 style="margin-top:0">민감정보 마스킹</h2>
+  <p class="small muted" style="margin:0 0 8px">원본 파일은 그대로 두고, DB 에 저장되는 본문에서만 가렸습니다.</p>
+  <table>
+    <% redacted.forEach(function (r) { %>
+    <tr><td><a href="/doc/<%= r.id %>"><%= r.title %></a></td><td class="muted small"><%= r.redacted %></td></tr>
+    <% }) %>
+  </table>
+</div>
+<% } %>
+
+<div class="card" style="margin-top:14px">
+  <h2 style="margin-top:0">수집 규칙</h2>
+  <p class="small muted" style="margin:0 0 8px"><code>config/sources.json</code> 에서 수정합니다.</p>
+  <p class="small"><b>수집 루트</b><br><code><%= cfg.workRoot %></code></p>
+  <p class="small"><b>대상 폴더</b><br>
+    <% cfg.sources.forEach(function (s) { %><span class="chip"><%= s.path === '.' ? 'myprofile (직속)' : s.path %></span> <% }) %>
+  </p>
+  <p class="small"><b>제외 키워드 (<%= cfg.excludeName.length %>)</b><br>
+    <% cfg.excludeName.forEach(function (s) { %><span class="chip"><%= s %></span> <% }) %>
+  </p>
+</div>
+
+<h2>문제 있는 자료 (<%= failures.length %>)</h2>
+<div class="card">
+<table>
+  <tr><th>제목</th><th>형식</th><th>사유</th></tr>
+  <% failures.forEach(function (f) { %>
+  <tr>
+    <td><a href="/doc/<%= f.id %>"><%= f.title %></a><div class="muted small"><%= f.rel_path %></div></td>
+    <td class="muted small"><%= f.ext %></td>
+    <td class="muted small"><%= f.error || '-' %></td>
+  </tr>
+  <% }) %>
+  <% if (!failures.length) { %><tr><td colspan="3" class="empty">문제 없는 상태입니다.</td></tr><% } %>
+</table>
+</div>
+<%- include('partials/foot') %>

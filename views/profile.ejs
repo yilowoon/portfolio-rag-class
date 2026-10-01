@@ -1,0 +1,158 @@
+<%- include('partials/head') %>
+
+<div class="page-actions no-print">
+  <a class="btn ghost" href="/profile/edit">내용 편집</a>
+  <button class="ghost" onclick="window.print()">인쇄 / PDF 저장</button>
+</div>
+
+<article class="resume">
+
+  <header class="resume-head">
+    <div class="rh-photo">
+      <% if (photoDoc) { %>
+        <img src="/doc/<%= photoDoc.id %>/raw" alt="프로필 사진">
+      <% } else { %>
+        <div class="rh-photo-empty"><%= (me.name || '?').slice(0,1) %></div>
+      <% } %>
+    </div>
+    <div class="rh-main">
+      <h1 class="rh-name"><%= me.name || '이름 미등록' %>
+        <% if (me.name_sub) { %><small><%= me.name_sub %></small><% } %>
+      </h1>
+      <% if (me.headline) { %><p class="rh-headline">“<%= me.headline %>”</p><% } %>
+      <p class="rh-now"><strong><%= me.org || '' %></strong><% if (me.position) { %> · <%= me.position %><% } %></p>
+      <dl class="rh-contact">
+        <% if (me.birth) { %><div><dt>생년월일</dt><dd><%= me.birth %></dd></div><% } %>
+        <% if (me.phone) { %><div><dt>휴대전화</dt><dd><%= me.phone %></dd></div><% } %>
+        <% if (me.office) { %><div><dt>사무실</dt><dd><%= me.office %></dd></div><% } %>
+        <% if (me.email) { %><div><dt>이메일</dt><dd><%= me.email %></dd></div><% } %>
+        <% if (me.address) { %><div class="wide"><dt>주소</dt><dd><%= me.address %></dd></div><% } %>
+      </dl>
+    </div>
+  </header>
+
+  <% if (me.summary) { %>
+  <section class="resume-sec">
+    <h2>핵심 역량</h2>
+    <ul class="bullets">
+      <% me.summary.split('\n').filter(Boolean).forEach(function (line) { %>
+        <li><%= line %></li>
+      <% }) %>
+    </ul>
+  </section>
+  <% } %>
+
+  <section class="resume-sec">
+    <h2>경력 <span class="cnt"><%= career.length %></span></h2>
+    <% if (!career.length) { %><p class="muted small">등록된 경력이 없습니다.</p><% } %>
+    <ol class="career">
+      <% career.forEach(function (c) { %>
+        <li>
+          <div class="c-period"><%= c.period_start || '' %><%= c.period_end ? ' ~ ' + c.period_end : (c.period_start ? ' ~ 현재' : '') %></div>
+          <div class="c-body">
+            <div class="c-title"><%= c.title %></div>
+            <% if (c.description) { %><div class="c-desc"><%= c.description %></div><% } %>
+          </div>
+        </li>
+      <% }) %>
+    </ol>
+  </section>
+
+  <section class="resume-sec">
+    <h2>학력 <span class="cnt"><%= education.length %></span></h2>
+    <table class="rt">
+      <% education.forEach(function (e) { %>
+      <tr>
+        <td class="rt-when"><%= e.period_start || '' %><%= e.period_end ? ' ~ ' + e.period_end : '' %></td>
+        <td class="rt-what"><%= e.title %></td>
+        <td class="rt-note"><%= e.description || '' %></td>
+      </tr>
+      <% }) %>
+    </table>
+  </section>
+
+  <section class="resume-sec">
+    <h2>자격 <span class="cnt"><%= certs.length %></span></h2>
+    <table class="rt">
+      <% certs.forEach(function (c) { %>
+      <tr>
+        <td class="rt-when"><%= c.period_start || '-' %></td>
+        <td class="rt-what"><%= c.title %></td>
+        <td class="rt-note"><%= c.org && c.org !== '-' ? c.org : '' %><% if (c.description) { %> <span class="muted">· <%= c.description %></span><% } %></td>
+      </tr>
+      <% }) %>
+    </table>
+  </section>
+
+  <% if (languages.length) { %>
+  <section class="resume-sec">
+    <h2>어학 <span class="cnt"><%= languages.length %></span></h2>
+    <table class="rt">
+      <% languages.forEach(function (l) { %>
+      <tr>
+        <td class="rt-when"><%= l.org || '-' %></td>
+        <td class="rt-what"><%= l.title %></td>
+        <td class="rt-note"><%= l.description || '' %></td>
+      </tr>
+      <% }) %>
+    </table>
+  </section>
+  <% } %>
+
+  <% if (papers.length) { %>
+  <section class="resume-sec">
+    <h2>논문·저술 <span class="cnt"><%= papers.length %></span></h2>
+    <table class="rt">
+      <% papers.forEach(function (p) { %>
+      <tr>
+        <td class="rt-when"><%= p.period_start || '-' %>
+          <% if (p.category === '저서') { %><span class="fsdiv">저서</span><% } %></td>
+        <td class="rt-what"><%= p.category === '저서' ? p.title : '「' + p.title + '」' %><% if (p.role && p.role !== '저자') { %> <span class="muted small"><%= p.role %></span><% } %></td>
+        <td class="rt-note"><%= p.org || '' %></td>
+      </tr>
+      <% }) %>
+    </table>
+  </section>
+  <% } %>
+
+  <% if (patents.length) { %>
+  <section class="resume-sec">
+    <h2>특허·실용신안 <span class="cnt"><%= patents.length %></span></h2>
+    <% patents.forEach(function (p) { %>
+      <div class="pat">
+        <div class="pat-t"><%= p.title %>
+          <span class="muted small"><%= [p.period_start, p.period_end].filter(Boolean).join(' ~ ') %></span></div>
+        <% if (p.outcomes) { %>
+          <ul class="pat-l">
+            <% p.outcomes.split(' / ').forEach(function (o) { %><li><%= o %></li><% }) %>
+          </ul>
+        <% } %>
+      </div>
+    <% }) %>
+  </section>
+  <% } %>
+
+  <section class="resume-sec">
+    <h2>수상 <span class="cnt"><%= awards.length %></span></h2>
+    <table class="rt">
+      <% awards.forEach(function (a) { %>
+      <tr>
+        <td class="rt-when"><%= a.period_start || '-' %></td>
+        <td class="rt-what"><%= a.title %></td>
+        <td class="rt-note"><%= a.org || '' %></td>
+      </tr>
+      <% }) %>
+      <% if (!awards.length) { %><tr><td colspan="3" class="muted small">등록된 수상 내역이 없습니다.</td></tr><% } %>
+    </table>
+    <p class="muted small no-print" style="margin-top:8px">
+      수상·논문·특허는 <a href="/portfolio">포트폴리오</a>에서 관리합니다.
+    </p>
+  </section>
+
+  <footer class="resume-foot">
+    <span>본 이력서의 내용은 <code>myprofile</code> 폴더의 원본 자료에서 정리한 것입니다.</span>
+    <% if (me.updated_at) { %><span>최종 수정 <%= new Date(me.updated_at).toLocaleDateString('ko-KR') %></span><% } %>
+  </footer>
+
+</article>
+<%- include('partials/foot') %>

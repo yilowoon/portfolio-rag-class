@@ -1,0 +1,55 @@
+<%- include('partials/head') %>
+<h1>자기소개서</h1>
+<p class="sub">
+  포트폴리오와 원본 자료를 근거로 초안을 만듭니다.
+  <%= sections.map(function (s) { return s.label; }).join(' · ') %> 다섯 항목으로 나눠 작성합니다.
+</p>
+
+<% if (!hasKey) { %>
+  <div class="card gap-box">
+    <h2 style="margin-top:0">생성 기능이 꺼져 있습니다</h2>
+    <p class="small"><code>.env</code> 에 <code>GEMINI_API_KEY</code> 를 넣고 서버를 다시 시작하세요.</p>
+  </div>
+<% } %>
+
+<div class="card">
+  <h2 style="margin-top:0">새로 만들기</h2>
+  <form method="post" action="/cover/new" class="cv-new">
+    <div>
+      <label class="f">대상 기업 (선택)</label>
+      <input type="text" name="corp_name" list="colist" placeholder="회사명 — 비우면 일반용으로 작성" style="width:100%">
+      <datalist id="colist">
+        <% companies.slice(0, 1500).forEach(function (c) { %><option value="<%= c.corp_name %>"><% }) %>
+      </datalist>
+    </div>
+    <div>
+      <label class="f">지원 직무 (선택)</label>
+      <input type="text" name="job_title" placeholder="예: 정책기획본부장" style="width:100%">
+    </div>
+    <div class="cv-new-act">
+      <button type="submit" <%= hasKey ? '' : 'disabled' %>>자기소개서 생성</button>
+    </div>
+  </form>
+  <p class="muted small" style="margin:10px 0 0">
+    기업을 지정하면 <a href="/matching">기업매칭</a>의 업종·역량 비교 결과가 지원동기 문단에 반영됩니다.
+    <b>기업매칭 화면에서 바로 생성</b>하면 기업 정보가 자동으로 붙습니다.
+  </p>
+</div>
+
+<h2>작성한 자기소개서 <span class="muted small">(<%= rows.length %>)</span></h2>
+<div class="card">
+<table>
+  <tr><th>대상</th><th>직무</th><th class="num">완성</th><th>수정</th></tr>
+  <% rows.forEach(function (r) { %>
+  <tr>
+    <td><a href="/cover/<%= r.id %>"><%= r.corp_name || '일반용' %></a>
+      <% if (r.industry) { %><div class="muted small"><%= r.industry %></div><% } %></td>
+    <td class="muted small"><%= r.job_title || '-' %></td>
+    <td class="num small"><%= r.done %>/<%= sections.length %></td>
+    <td class="muted small"><%= r.updated_at ? new Date(r.updated_at).toLocaleString('ko-KR') : '-' %></td>
+  </tr>
+  <% }) %>
+  <% if (!rows.length) { %><tr><td colspan="4" class="empty">아직 만든 자기소개서가 없습니다.</td></tr><% } %>
+</table>
+</div>
+<%- include('partials/foot') %>

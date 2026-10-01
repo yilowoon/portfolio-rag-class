@@ -1,0 +1,44 @@
+
+<script>
+/* 다크 ↔ 라이트 전환. 선택은 브라우저에 남겨 다음 방문에도 유지된다. */
+(function () {
+  var btn = document.getElementById("themeToggle");
+  if (!btn) return;
+  var root = document.documentElement;
+  var sync = function () {
+    var light = root.getAttribute("data-theme") === "light";
+    btn.setAttribute("aria-pressed", String(light));
+    btn.title = light ? "다크 모드로 전환" : "라이트 모드로 전환";
+    btn.setAttribute("aria-label", btn.title);
+  };
+  sync();
+  btn.addEventListener("click", function () {
+    var next = root.getAttribute("data-theme") === "light" ? "dark" : "light";
+    root.setAttribute("data-theme", next);
+    try { localStorage.setItem("theme", next); } catch (e) {}
+    sync();
+  });
+})();
+</script>
+
+<script>
+/*
+ * 자기소개서 생성은 모델 호출이라 20초 안팎이 걸린다.
+ * 그동안 화면이 멈춘 것처럼 보이지 않도록 버튼 상태를 바꾸고 중복 제출을 막는다.
+ */
+document.addEventListener('submit', function (e) {
+  var form = e.target;
+  if (!/^\/cover/.test(form.getAttribute('action') || '')) return;
+  var btn = form.querySelector('button[type=submit]:focus') || form.querySelector('button[type=submit]');
+  if (!btn || btn.disabled) return;
+  var wait = /regenerate|\/cover\/new$/.test((form.getAttribute('action') || '') + (btn.value || ''));
+  if (!wait) return;
+  btn.dataset.label = btn.textContent;
+  btn.textContent = '생성 중…';
+  btn.disabled = true;
+  form.querySelectorAll('button[type=submit]').forEach(function (b) { b.disabled = true; });
+});
+</script>
+</div>
+</body>
+</html>

@@ -1,0 +1,13 @@
+node_modules/
+.env
+*.log
+
+# SQLite 작업 파일
+data/*.db
+data/*.db-*
+data/cache/
+
+# 각자의 프로필 원본 자료 — 개인정보가 들어가므로 저장소에 올리지 않는다
+myprofile/*
+!myprofile/.gitkeep
+!myprofile/rawdata/.gitkeep

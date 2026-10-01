@@ -1,0 +1,52 @@
+<%- include('partials/head') %>
+<h1>질의응답</h1>
+<p class="sub">
+  자료에서 근거를 찾아 답합니다. 문장 뒤 [번호]는 아래 근거 목록과 이어집니다.
+  <% if (!hasKey) { %><span class="note">— 지금은 키가 없어 근거 검색만 동작합니다.</span><% } %>
+</p>
+
+<form method="post" action="/ask" class="card">
+  <textarea name="question" placeholder="예) 내가 세종시 창업생태계와 관련해 제안했던 핵심 전략을 정리해줘" autofocus><%= question %></textarea>
+  <div class="row" style="margin-top:10px">
+    <button type="submit">묻기</button>
+    <span class="muted small">Ctrl+Enter 로도 전송</span>
+  </div>
+</form>
+
+<% if (result) { %>
+  <% if (result.answer) { %>
+  <div class="card" style="margin-top:14px">
+    <h2 style="margin-top:0">답변</h2>
+    <div class="answer"><%- result.answer.replace(/\[(\d+)\]/g, '<span class="cite">[$1]</span>') %></div>
+  </div>
+  <% } %>
+  <% if (result.note) { %><p class="note" style="margin-top:12px"><%= result.note %></p><% } %>
+
+  <% if (result.sources && result.sources.length) { %>
+  <div class="card" style="margin-top:14px">
+    <h2 style="margin-top:0">근거 자료</h2>
+    <% result.sources.forEach(s => { %>
+      <div class="hit">
+        <div class="t"><span class="pill acc">[<%= s.n %>]</span>
+          <a href="/doc/<%= s.doc_id %>"><%= s.title %></a></div>
+        <div class="meta"><%= s.org || '-' %> · <%= s.doc_type || '-' %> · <%= s.year || '연도미상' %></div>
+        <div class="snip"><%= s.excerpt %>…</div>
+      </div>
+    <% }) %>
+  </div>
+  <% } %>
+<% } %>
+
+<% if (recentQ && recentQ.length) { %>
+  <h2>최근 질문</h2>
+  <div class="chips">
+    <% recentQ.forEach(x => { %><span class="chip"><%= x.length > 40 ? x.slice(0,40)+'…' : x %></span><% }) %>
+  </div>
+<% } %>
+
+<script>
+document.querySelector('textarea[name=question]').addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') e.target.form.submit();
+});
+</script>
+<%- include('partials/foot') %>

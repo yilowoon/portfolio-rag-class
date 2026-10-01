@@ -1,0 +1,32 @@
+/* 자기소개서 화면 */
+
+.navcta { color: var(--accent); border: 1px solid var(--accent); border-radius: 7px;
+  padding: 5px 12px; font-size: 13.5px; white-space: nowrap; }
+.navcta:hover { background: var(--accent-soft); text-decoration: none; }
+.navcta.on { background: var(--accent); color: var(--on-accent); }
+
+.cv-new { display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: end; }
+@media (max-width: 720px) { .cv-new { grid-template-columns: 1fr; } }
+.cv-new-act { padding-bottom: 1px; }
+
+.cv-sec { background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+  padding: 18px 22px; margin: 14px 0; }
+.cv-head { display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--line);
+  padding-bottom: 10px; margin-bottom: 14px; }
+.cv-head h2 { margin: 0; font-size: 16px; display: flex; align-items: center; gap: 9px; }
+.cv-n { display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px; border-radius: 50%; background: var(--accent-soft);
+  color: var(--accent); font-size: 12px; font-weight: 700; }
+.cv-meta { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+
+.cv-body { white-space: pre-wrap; line-height: 1.85; font-size: 14.5px; color: var(--text-2); }
+.cv-edit { margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--line); }
+.cv-edit summary { color: var(--accent); font-size: 13px; }
+.cv-edit textarea { min-height: 90px; }
+
+@media print {
+  .cv-sec { border: none; padding: 0; margin: 0 0 20px; break-inside: avoid; }
+  .cv-head { border-bottom: 1px solid #ccc; }
+  .cv-body { color: #111; font-size: 11pt; }
+  .cv-n { background: none; color: #111; }
+}

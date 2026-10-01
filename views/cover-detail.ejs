@@ -1,0 +1,81 @@
+<%- include('partials/head') %>
+
+<div class="page-actions no-print">
+  <a class="btn ghost" href="/cover">목록</a>
+  <form method="post" action="/cover/<%= letter.id %>/regenerate" style="display:inline"
+        onsubmit="return confirm('다섯 항목을 모두 다시 생성합니다. 직접 고친 내용은 사라집니다. 진행할까요?')">
+    <button class="ghost" type="submit" <%= hasKey ? '' : 'disabled' %>>전체 재생성</button>
+  </form>
+  <button class="ghost" onclick="window.print()">인쇄 / PDF 저장</button>
+</div>
+
+<h1><%= letter.corp_name || '일반용' %> 자기소개서</h1>
+<p class="sub">
+  <% if (letter.industry) { %><%= letter.industry %> · <% } %>
+  <%= letter.job_title || '직무 미지정' %>
+  <% if (letter.updated_at) { %> · 최종 <%= new Date(letter.updated_at).toLocaleString('ko-KR') %><% } %>
+</p>
+
+<form method="post" action="/cover/<%= letter.id %>/meta" class="row no-print" style="margin-bottom:16px">
+  <input type="text" name="job_title" value="<%= letter.job_title || '' %>" placeholder="지원 직무" style="min-width:220px">
+  <button class="ghost" type="submit">직무 저장</button>
+</form>
+
+<% letter.sections.forEach(function (s, i) { %>
+  <section class="cv-sec" id="<%= s.key %>">
+    <div class="cv-head">
+      <h2><span class="cv-n"><%= i + 1 %></span> <%= s.label %></h2>
+      <div class="cv-meta no-print">
+        <% if (s.status === 'ok') { %><span class="pill ok">작성됨</span>
+        <% } else if (s.status === 'error') { %><span class="pill bad">실패</span>
+        <% } else if (s.status === 'empty') { %><span class="pill warn">내용 없음</span>
+        <% } else { %><span class="pill">미작성</span><% } %>
+        <% if (s.content) { %><span class="muted small"><%= s.content.replace(/\s/g, '').length %>자</span><% } %>
+      </div>
+    </div>
+
+    <% if (s.content) { %>
+      <div class="cv-body"><%= s.content %></div>
+    <% } else { %>
+      <p class="muted small cv-body">아직 작성되지 않았습니다.</p>
+    <% } %>
+
+    <% if (s.note) { %>
+      <p class="note no-print"><b>보완 필요</b> — <%= s.note %></p>
+    <% } %>
+
+    <details class="cv-edit no-print">
+      <summary>추가 정보 입력하고 다시 생성</summary>
+      <form method="post" action="/cover/<%= letter.id %>/section/<%= s.key %>" style="margin-top:10px">
+        <label class="f">이 항목에 반영할 내용 — 자료에 없는 사실을 여기에 적으면 그대로 반영합니다</label>
+        <textarea name="extra_info" placeholder="<%= s.placeholder || '예) 구체적인 일화, 수치, 회사에 대해 알고 있는 점' %>"><%= s.extra_info || '' %></textarea>
+        <div class="row" style="margin-top:10px">
+          <button type="submit" name="action" value="regenerate" <%= hasKey ? '' : 'disabled' %>>이 항목 다시 생성</button>
+          <span class="muted small">추가 정보만 저장하려면 아래 '직접 수정'을 쓰세요</span>
+        </div>
+      </form>
+
+      <form method="post" action="/cover/<%= letter.id %>/section/<%= s.key %>" style="margin-top:14px">
+        <input type="hidden" name="extra_info" value="<%= s.extra_info || '' %>">
+        <label class="f">직접 수정 — 생성된 문장을 손보고 싶을 때</label>
+        <textarea name="content" style="min-height:150px"><%= s.content || '' %></textarea>
+        <div class="row" style="margin-top:10px">
+          <button class="ghost" type="submit" name="action" value="save_content">본문 저장</button>
+        </div>
+      </form>
+    </details>
+  </section>
+<% }) %>
+
+<div class="card note-box no-print">
+  <p class="small" style="margin:0">
+    <b>제출 전에 반드시 직접 검토하세요.</b> 초안은 포트폴리오와 원본 문서에 있는 사실만으로 만들지만,
+    문장을 다듬는 과정에서 뉘앙스가 달라질 수 있습니다. 수치와 기간은 특히 확인이 필요합니다.
+  </p>
+</div>
+
+<form method="post" action="/cover/<%= letter.id %>/delete" class="no-print" style="margin-top:14px"
+      onsubmit="return confirm('이 자기소개서를 삭제할까요?')">
+  <button class="danger" type="submit">삭제</button>
+</form>
+<%- include('partials/foot') %>

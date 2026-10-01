@@ -1,0 +1,42 @@
+/* 기업매칭 화면 전용 */
+
+.mt-top { display: grid; grid-template-columns: minmax(0, 360px) minmax(0, 1fr); gap: 14px; margin: 16px 0 14px; }
+@media (max-width: 820px) { .mt-top { grid-template-columns: 1fr; } }
+.mt-radar { display: flex; flex-direction: column; align-items: center; }
+.mt-radar h2 { align-self: flex-start; }
+.mt-axes table td { vertical-align: middle; }
+
+.radar { display: block; margin: 4px auto 0; max-width: 100%; height: auto; }
+.radar-legend { display: flex; gap: 16px; justify-content: center; margin-top: 8px;
+  font-size: 12px; color: var(--muted); }
+.radar-legend span { display: flex; align-items: center; gap: 6px; }
+.radar-legend .sw { width: 14px; height: 3px; border-radius: 2px; display: inline-block; }
+.radar-legend .sw.mine { background: var(--chart-1); }
+.radar-legend .sw.want { background: var(--chart-2); }
+
+.mt-scores .stat .n { font-size: 30px; }
+.mt-scores .stat .l { font-size: 13px; color: var(--text); margin-top: 2px; }
+
+table.mt-list th { white-space: nowrap; }
+table.mt-list td { vertical-align: middle; }
+
+/* 적합도 배지 — 높을수록 진하게 */
+.score { display: inline-block; min-width: 38px; text-align: center; border-radius: 6px;
+  padding: 2px 7px; font-weight: 600; font-size: 13px;
+  background: var(--surface-2); border: 1px solid var(--line); color: var(--muted); }
+.score.s8, .score.s9 { color: var(--on-accent); background: var(--accent); border-color: var(--accent); }
+.score.s7 { color: var(--accent); border-color: rgba(217,164,65,.55); background: var(--accent-soft); }
+.score.s6 { color: var(--text); border-color: var(--line-strong); }
+
+.gapnum { color: var(--warn); font-weight: 600; }
+.okmark { color: var(--ok); font-size: 12.5px; }
+
+.note-box { margin-top: 14px; border-style: dashed; }
+
+.tips .tip { padding: 10px 0; border-bottom: 1px solid var(--line); }
+.tips .tip:last-of-type { border-bottom: none; }
+.tip-h { font-size: 14px; }
+.tip-b { margin: 4px 0 0; font-size: 13.5px; color: var(--text-2); }
+
+.fsdiv { display: inline-block; font-size: 10.5px; color: var(--muted);
+  border: 1px solid var(--line); border-radius: 10px; padding: 0 6px; margin-left: 5px; }

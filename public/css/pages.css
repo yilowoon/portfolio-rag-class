@@ -1,0 +1,183 @@
+/* 포트폴리오·이력서·기업매칭 화면 전용 스타일 (app.css 위에 얹는다) */
+
+/* ══ 공통 추가 ══════════════════════════════════ */
+.bullets { margin: 0; padding-left: 18px; }
+.bullets li { margin: 4px 0; }
+.warnmuted { color: var(--warn); }
+.pill.warn { color: var(--warn); border-color: rgba(226,179,90,.4); }
+.page-actions { display: flex; gap: 8px; justify-content: flex-end; margin: 22px 0 10px; }
+.ybar { flex: 1; display: flex; flex-direction: column; justify-content: flex-end;
+  align-items: center; height: 100%; text-decoration: none; }
+.ybar > span { display: block; width: 100%; background: var(--chart-1); opacity: .9; border-radius: 3px 3px 0 0; }
+.ybar > em { font-style: normal; color: var(--muted); font-size: 11px; margin-top: 4px; }
+.item-row { border-bottom: 1px solid var(--line); padding: 10px 0; }
+.item-row:last-child { border-bottom: none; }
+
+/* ══ 대시보드 — 체계화 진행 ══════════════════════ */
+.prog { margin: 16px 0 14px; border-color: rgba(217,164,65,.28); }
+.prog-bars { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-top: 14px; }
+@media (max-width: 860px) { .prog-bars { grid-template-columns: repeat(4, 1fr); } }
+@media (max-width: 520px) { .prog-bars { grid-template-columns: repeat(2, 1fr); } }
+.pb { display: block; text-align: center; padding: 10px 6px; border: 1px solid var(--line);
+  border-radius: 8px; background: var(--surface-2); text-decoration: none; }
+.pb:hover { border-color: var(--accent); text-decoration: none; }
+.pb.off { opacity: .55; }
+.pb-n { display: block; font-size: 20px; font-weight: 700; color: var(--text); }
+.pb-k { display: block; font-size: 12px; color: var(--muted); margin-top: 1px; }
+.pb-s { display: block; font-size: 10.5px; margin-top: 5px; }
+.pb-s.ok { color: var(--ok); }
+.pb-s.warn { color: var(--warn); }
+.pb-s.bad { color: var(--bad); }
+
+/* ══ 포트폴리오 ═══════════════════════════════════ */
+.pf-hero { display: flex; align-items: flex-end; gap: 16px; margin-bottom: 6px; }
+.pf-hero h1 { margin-bottom: 4px; }
+.pf-hero .sub { margin: 0; max-width: 720px; }
+.pf-hero .btn { margin-left: auto; white-space: nowrap; }
+
+.catbar { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; margin: 18px 0 6px; }
+@media (max-width: 900px) { .catbar { grid-template-columns: repeat(4, 1fr); } }
+@media (max-width: 520px) { .catbar { grid-template-columns: repeat(2, 1fr); } }
+.cat { display: block; text-align: center; padding: 12px 6px 10px; border: 1px solid var(--line);
+  border-radius: 10px; background: var(--surface); text-decoration: none; transition: .12s; }
+.cat:hover { border-color: var(--accent); transform: translateY(-1px); text-decoration: none; }
+.cat.on { border-color: var(--accent); background: var(--accent-soft); }
+.cat.empty { opacity: .5; }
+.c-ico { display: block; color: var(--accent); font-size: 15px; }
+.c-name { display: block; font-size: 12.5px; color: var(--text); margin-top: 4px; }
+.c-num { display: block; font-size: 11px; color: var(--muted); margin-top: 2px; }
+.cat-desc { color: var(--muted); font-size: 13.5px; margin: 10px 0 0; }
+
+.empty-box { margin-top: 16px; text-align: center; padding: 34px 20px; }
+.eb-title { font-size: 15px; margin: 0 0 6px; }
+.gap-box { margin-top: 18px; border-color: rgba(226,179,90,.3); }
+
+/* 타임라인 */
+.tl { margin-top: 20px; }
+.tl-group { display: grid; grid-template-columns: 92px 1fr; gap: 18px; }
+@media (max-width: 640px) { .tl-group { grid-template-columns: 56px 1fr; gap: 12px; } }
+.tl-year { position: relative; padding-top: 16px; font-size: 19px; font-weight: 700;
+  color: var(--accent); letter-spacing: -0.02em; text-align: right; }
+.tl-items { position: relative; border-left: 1px solid var(--line); padding: 0 0 8px 22px; }
+@media (max-width: 640px) { .tl-items { padding-left: 16px; } }
+.tl-items::before { content: ""; position: absolute; left: -5px; top: 22px; width: 9px; height: 9px;
+  border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 3px var(--bg); }
+.tl-card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+  padding: 14px 16px; margin: 14px 0; }
+.tl-card:hover { border-color: var(--line-strong); }
+.tc-head { display: flex; gap: 10px; align-items: center; font-size: 11.5px; }
+.tc-cat { color: var(--accent); background: var(--accent-soft); border-radius: 20px; padding: 2px 9px; }
+.tc-period { color: var(--muted); margin-left: auto; }
+.tc-title { font-size: 15.5px; margin: 8px 0 2px; line-height: 1.45; }
+.tc-title a { color: var(--text); }
+.tc-title a:hover { color: var(--accent); text-decoration: none; }
+.tc-org { font-size: 13px; color: var(--text-2); }
+.tc-sum { font-size: 13.5px; color: var(--text-2); margin: 8px 0 0; }
+.tc-out { margin: 8px 0 0; padding-left: 16px; }
+.tc-out li { font-size: 13px; color: var(--ok); margin: 3px 0; }
+.tc-foot { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 11px;
+  padding-top: 10px; border-top: 1px solid var(--line); }
+
+/* ══ 이력서 ═══════════════════════════════════════ */
+.resume { background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+  padding: 34px 38px 26px; }
+@media (max-width: 640px) { .resume { padding: 22px 18px; } }
+.resume-head { display: flex; gap: 26px; align-items: flex-start;
+  padding-bottom: 22px; border-bottom: 2px solid var(--accent); }
+@media (max-width: 640px) { .resume-head { flex-direction: column; gap: 16px; } }
+.rh-photo img { width: 112px; height: 146px; object-fit: cover; border-radius: 8px; border: 1px solid var(--line); }
+.rh-photo-empty { width: 112px; height: 146px; border-radius: 8px; background: var(--surface-2);
+  border: 1px solid var(--line); display: flex; align-items: center; justify-content: center;
+  font-size: 40px; color: var(--accent); }
+.rh-main { flex: 1; min-width: 0; }
+.rh-name { font-size: 30px; margin: 0 0 4px; letter-spacing: -0.03em; }
+.rh-name small { font-size: 13px; font-weight: 400; color: var(--muted); margin-left: 8px; letter-spacing: 0; }
+.rh-headline { color: var(--accent); font-size: 14.5px; margin: 0 0 10px; }
+.rh-now { font-size: 14.5px; margin: 0 0 14px; }
+.rh-contact { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 20px; margin: 0; }
+@media (max-width: 640px) { .rh-contact { grid-template-columns: 1fr; } }
+.rh-contact > div { display: flex; gap: 10px; font-size: 13px; }
+.rh-contact > div.wide { grid-column: 1 / -1; }
+.rh-contact dt { color: var(--muted); min-width: 62px; }
+.rh-contact dd { margin: 0; color: var(--text); }
+
+.resume-sec { margin-top: 26px; }
+.resume-sec h2 { font-size: 14px; letter-spacing: .06em; color: var(--accent);
+  border-bottom: 1px solid var(--line); padding-bottom: 7px; margin: 0 0 12px; }
+.resume-sec h2 .cnt { color: var(--muted); font-weight: 400; margin-left: 6px; letter-spacing: 0; }
+
+.career { list-style: none; margin: 0; padding: 0; }
+.career li { display: grid; grid-template-columns: 160px 1fr; gap: 16px; padding: 10px 0;
+  border-bottom: 1px solid var(--line); }
+.career li:last-child { border-bottom: none; }
+@media (max-width: 640px) { .career li { grid-template-columns: 1fr; gap: 3px; } }
+.c-period { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; padding-top: 1px; }
+.c-title { font-size: 14.5px; font-weight: 600; }
+.c-desc { font-size: 13px; color: var(--text-2); margin-top: 3px; }
+
+table.rt { width: 100%; border-collapse: collapse; }
+table.rt td { padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 13.5px; vertical-align: top; }
+table.rt tr:last-child td { border-bottom: none; }
+table.rt tr:hover td { background: transparent; }
+.rt-when { width: 130px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.rt-what { font-weight: 500; }
+.rt-note { color: var(--muted); text-align: right; }
+@media (max-width: 640px) { .rt-when { width: 96px; } .rt-note { display: none; } }
+
+.resume-foot { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  margin-top: 28px; padding-top: 14px; border-top: 1px solid var(--line);
+  color: var(--muted); font-size: 12px; }
+
+/* ══ 기업매칭 대기 화면 ═══════════════════════════ */
+.standby { margin-top: 16px; text-align: center; padding: 38px 20px; border-style: dashed; }
+.sb-mark { display: inline-block; font-size: 11.5px; letter-spacing: .1em; color: var(--accent);
+  border: 1px solid var(--accent); border-radius: 20px; padding: 3px 14px; }
+.sb-lead { font-size: 16px; margin: 14px 0 6px; }
+
+/* ══ 인쇄 ═════════════════════════════════════════ */
+@media print {
+  :root { --bg: #fff; --surface: #fff; --surface-2: #fff; --text: #111; --muted: #555;
+          --line: #ccc; --accent: #8a6a1f; }
+  body { background: #fff; color: #111; font-size: 11pt; }
+  header.top, .no-print { display: none !important; }
+  .wrap { max-width: none; padding: 0; }
+  .resume { border: none; border-radius: 0; padding: 0; }
+  .resume-sec { break-inside: avoid; }
+  .career li, table.rt tr { break-inside: avoid; }
+  a { color: #111; text-decoration: none; }
+}
+
+/* 이력서 — 특허·실용신안 */
+.pat { padding: 8px 0; border-bottom: 1px solid var(--line); }
+.pat:last-child { border-bottom: none; }
+.pat-t { font-size: 13.5px; font-weight: 500; }
+.pat-l { margin: 5px 0 0; padding-left: 16px; }
+.pat-l li { font-size: 12.5px; color: var(--muted); margin: 2px 0; }
+
+/* 기업매칭 — 수집 단계 */
+.steps { margin: 0; padding-left: 20px; }
+.steps li { margin: 10px 0; font-size: 13.5px; }
+.steps li.done { color: var(--ok); }
+.steps li.done b { color: var(--ok); }
+.steps code { background: var(--surface-2); border: 1px solid var(--line);
+  border-radius: 5px; padding: 1px 6px; font-size: 12.5px; color: var(--accent); }
+
+/* ══ 연도별 활동 분포 차트 ════════════════════════ */
+.yc { margin: 0; }
+/*
+ * 좁은 화면에서 viewBox 가 그대로 줄면 축 글자가 3~4px 이 되어 못 읽는다.
+ * 최소 너비를 두고 가로로 넘기게 해 비율과 가독성을 지킨다.
+ */
+.yc-plot { overflow-x: auto; overflow-y: hidden; }
+.yc-svg { display: block; width: 100%; height: auto; }
+/* 폰 폭에서만 가로 스크롤 — 중간 크기 화면에서는 그냥 줄어들게 둔다 */
+@media (max-width: 560px) { .yc-svg { min-width: 520px; } }
+.yc-bar { fill: var(--chart-1); transition: fill .12s; }
+.yc-bar:hover { fill: var(--chart-1-hover); }
+.yc-tick { font-variant-numeric: tabular-nums; }
+.yc-cap { margin-top: 10px; font-size: 13px; color: var(--muted); }
+.yc-cap b { color: var(--text); font-weight: 600; }
+.yc-table { margin-top: 10px; }
+.yc-table summary { color: var(--muted); font-size: 12.5px; }
+.yc-table table { margin-top: 8px; max-width: 280px; }
+.yc-table td, .yc-table th { padding: 4px 8px; font-size: 12.5px; }

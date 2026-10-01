@@ -1,0 +1,122 @@
+<%- include('partials/head') %>
+<h1><%= co.corp_name %></h1>
+<p class="sub">
+  <%= ev.industry.label %>
+  <% if (co.region) { %> · <%= co.region %><% } %>
+  <% if (co.stock_code) { %> · <%= co.stock_code %><% } %>
+  <% if (co.corp_cls) { %> · <%= ({Y:'유가증권', K:'코스닥', N:'코넥스', E:'기타법인'})[co.corp_cls] || co.corp_cls %><% } %>
+  <% if (co.est_dt) { %> · <%= co.est_dt.slice(0,4) %>년 설립<% } %>
+</p>
+
+<div class="row" style="margin:10px 0 16px">
+  <a class="btn ghost" href="/matching">목록</a>
+  <% if (co.stock_code) { %>
+    <a class="btn ghost" href="https://dart.fss.or.kr/dsab007/main.do?textCrpNm=<%= encodeURIComponent(co.corp_name) %>" target="_blank" rel="noopener">DART 공시 보기</a>
+  <% } %>
+  <% if (co.hm_url) { %>
+    <a class="btn ghost" href="<%= co.hm_url.startsWith('http') ? co.hm_url : 'http://' + co.hm_url %>" target="_blank" rel="noopener">홈페이지</a>
+  <% } %>
+  <form method="post" action="/cover/new" class="row right" style="gap:6px">
+    <input type="hidden" name="corp_code" value="<%= co.corp_code %>">
+    <input type="text" name="job_title" placeholder="지원 직무(선택)" style="width:150px">
+    <button type="submit">자기소개서 생성</button>
+  </form>
+</div>
+
+<div class="grid c3 mt-scores">
+  <div class="card stat"><div class="n"><%= ev.fit %></div><div class="l">적합도</div>
+    <div class="muted small">업종이 중시하는 축에서 내 강도</div></div>
+  <div class="card stat"><div class="n"><%= ev.demand %></div><div class="l">요구 수준</div>
+    <div class="muted small">이 업종이 요구하는 역량의 눈높이</div></div>
+  <div class="card stat"><div class="n"><%= ev.priority %></div><div class="l">우선순위</div>
+    <div class="muted small">눈높이와 적합도를 함께 본 값</div></div>
+</div>
+
+<div class="mt-top" style="margin-top:14px">
+  <div class="card mt-radar">
+    <h2 style="margin-top:0">역량 비교</h2>
+    <%- include('partials/radar', { axes: axes, meta: meta, my: my.score,
+          want: Object.fromEntries(axes.map(function (a) { return [a, ev.industry.w[a]]; })),
+          size: 300, myLabel: '내 역량', wantLabel: ev.industry.label + ' 요구(추정)' }) %>
+  </div>
+
+  <div class="card mt-axes">
+    <h2 style="margin-top:0">축별 격차</h2>
+    <table>
+      <tr><th>축</th><th class="num">나</th><th class="num">요구</th><th class="num">격차</th></tr>
+      <% ev.gaps.forEach(function (g) { %>
+      <tr>
+        <td><%= g.label %></td>
+        <td class="num"><%= g.mine %></td>
+        <td class="num muted"><%= g.want %></td>
+        <td class="num">
+          <% if (g.gap > 0) { %><span class="gapnum">+<%= g.gap %></span>
+          <% } else { %><span class="okmark">충족</span><% } %>
+        </td>
+      </tr>
+      <% }) %>
+    </table>
+    <% if (ev.strengths.length) { %>
+      <p class="small" style="margin-bottom:0"><span class="pill ok">강점</span>
+        <%= ev.strengths.join(', ') %> — 요구 수준을 넘습니다.</p>
+    <% } %>
+  </div>
+</div>
+
+<% if (tips.length) { %>
+<div class="card tips" style="margin-top:14px">
+  <h2 style="margin-top:0">보완 포인트</h2>
+  <% tips.forEach(function (t) { %>
+    <div class="tip">
+      <div class="tip-h"><b><%= t.label %></b> <span class="gapnum">+<%= t.gap %></span></div>
+      <p class="tip-b"><%= t.tip %></p>
+    </div>
+  <% }) %>
+  <p class="muted small" style="margin-bottom:0">
+    <a href="/portfolio">포트폴리오</a>에 항목을 추가하면 축 점수가 다시 계산됩니다.
+  </p>
+</div>
+<% } else { %>
+<div class="card" style="margin-top:14px">
+  <p class="small" style="margin:0"><span class="pill ok">보완 없음</span>
+    이 업종이 요구하는 축을 모두 충족합니다.</p>
+</div>
+<% } %>
+
+<div class="grid c2" style="margin-top:14px">
+  <div class="card">
+    <h2 style="margin-top:0">기업 정보</h2>
+    <table class="rt">
+      <tr><td class="rt-when">대표자</td><td class="rt-what"><%= co.ceo_nm || '-' %></td></tr>
+      <tr><td class="rt-when">설립일</td><td class="rt-what"><%= co.est_dt && co.est_dt.length === 8
+        ? co.est_dt.slice(0,4) + '-' + co.est_dt.slice(4,6) + '-' + co.est_dt.slice(6,8) : (co.est_dt || '-') %></td></tr>
+      <tr><td class="rt-when">업종코드</td><td class="rt-what"><%= co.induty_code || '-' %> <span class="muted small">(<%= ev.industry.label %>)</span></td></tr>
+      <tr><td class="rt-when">결산월</td><td class="rt-what"><%= co.acc_mt ? co.acc_mt + '월' : '-' %></td></tr>
+      <tr><td class="rt-when">주소</td><td class="rt-what"><%= co.adres || '-' %></td></tr>
+      <tr><td class="rt-when">전화</td><td class="rt-what"><%= co.phn_no || '-' %></td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2 style="margin-top:0">재무 주요계정</h2>
+    <% if (!fin.length) { %>
+      <p class="muted small" style="margin:0">
+        아직 받아오지 않았습니다. <code>npm run dart finance -- --year 2024</code> 로 채울 수 있습니다.
+        <br>상장사·IFRS 적용 비상장사만 제공됩니다.
+      </p>
+    <% } else { %>
+      <table class="rt">
+        <% fin.slice(0, 16).forEach(function (f) { %>
+        <tr>
+          <td class="rt-when"><%= f.bsns_year %>
+            <span class="fsdiv"><%= f.fs_div === 'CFS' ? '연결' : '개별' %></span></td>
+          <td class="rt-what"><%= f.account_nm %></td>
+          <td class="rt-note"><%= f.amount ? Number(String(f.amount).replace(/,/g, '')).toLocaleString() : '-' %></td>
+        </tr>
+        <% }) %>
+      </table>
+      <p class="muted small" style="margin:8px 0 0">단위: 원. 개별은 회사 단독, 연결은 종속회사 포함입니다.</p>
+    <% } %>
+  </div>
+</div>
+<%- include('partials/foot') %>

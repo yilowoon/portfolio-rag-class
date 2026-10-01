@@ -1,0 +1,23 @@
+# Render Blueprint — GitHub 저장소 연결 후 자동 구성
+#
+# 주의: 이 앱은 이력서(생년월일·주소·연락처)와 전체 경력을 그대로 보여준다.
+#       APP_PASSWORD 를 반드시 지정해야 하며, 비우면 누구나 열람할 수 있다.
+services:
+  - type: web
+    name: profile-job
+    runtime: node
+    plan: free
+    buildCommand: npm install --omit=dev
+    startCommand: node server.js
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SESSION_SECRET
+        generateValue: true # Render 가 임의 값을 만들어 넣는다
+      - key: APP_PASSWORD
+        sync: false # 대시보드에서 직접 입력 — 비우면 인증 없이 공개된다
+      - key: GEMINI_API_KEY
+        sync: false # 선택. 없으면 키워드 검색만 동작
+      - key: DART_API_KEY
+        sync: false # 선택. 기업 데이터를 서버에서 갱신할 때만 필요

@@ -1,0 +1,31 @@
+{
+  "name": "portfolio-rag-class",
+  "version": "0.1.0",
+  "description": "RAG 기반 포트폴리오 체계화 DB + 웹사이트 (수업 실습용)",
+  "type": "commonjs",
+  "main": "server.js",
+  "private": true,
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "ingest": "node scripts/ingest.js",
+    "ingest:dry": "node scripts/ingest.js --dry-run",
+    "seed": "node scripts/seed-sample.js",
+    "embed": "node scripts/embed.js",
+    "dart": "node scripts/dart-sync.js",
+    "stats": "node scripts/stats.js",
+    "index:activities": "node scripts/index-activities.js",
+    "sync": "node scripts/sync.js"
+  },
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "dependencies": {
+    "cfb": "^1.2.2",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "express-session": "^1.18.1",
+    "fflate": "^0.8.2",
+    "pdfjs-dist": "^4.10.38"
+  }
+}

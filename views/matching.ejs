@@ -1,0 +1,112 @@
+<%- include('partials/head') %>
+<h1>기업매칭</h1>
+<p class="sub">포트폴리오에서 뽑은 6개 역량 축을 업종별 요구 프로필과 맞춰 봅니다. 기업 정보는 OpenDART 공시자료입니다.</p>
+
+<% if (!dart.enriched) { %>
+  <div class="card gap-box">
+    <h2 style="margin-top:0">기업 데이터가 아직 없습니다</h2>
+    <p class="small">
+      <% if (!dart.hasKey) { %>
+        <code>.env</code> 에 <code>DART_API_KEY</code> 를 넣은 뒤
+      <% } %>
+      <code>npm run dart codes</code> → <code>npm run dart enrich -- --listed</code> 순서로 실행하세요.
+    </p>
+  </div>
+<% } else { %>
+
+<div class="mt-top">
+  <div class="card mt-radar">
+    <h2 style="margin-top:0">내 역량 프로필</h2>
+    <%- include('partials/radar', { axes: axes, meta: meta, my: my.score, size: 280, myLabel: '내 역량(상대 강도)' }) %>
+    <p class="muted small" style="margin:10px 0 0">
+      100 은 “완벽”이 아니라 <b>내 안에서 가장 두꺼운 축</b>이라는 뜻입니다. 축 사이의 균형을 보는 그림입니다.
+    </p>
+  </div>
+
+  <div class="card mt-axes">
+    <h2 style="margin-top:0">축별 근거</h2>
+    <table>
+      <% axes.forEach(function (a) { %>
+      <tr>
+        <td style="width:34%"><%= meta[a].label %>
+          <div class="muted small"><%= my.counts[a] %>개 활동</div></td>
+        <td><div class="bar"><i style="width:<%= my.score[a] %>%"></i></div></td>
+        <td class="num" style="width:44px"><%= my.score[a] %></td>
+      </tr>
+      <% }) %>
+    </table>
+    <p class="muted small" style="margin-bottom:0">
+      포트폴리오 활동·경력·자격에서 계산합니다. 항목을 추가하면 이 값이 바뀝니다.
+    </p>
+  </div>
+</div>
+
+<form class="search" method="get" action="/matching">
+  <input type="search" name="q" class="grow" value="<%= sel.q %>" placeholder="회사명 검색">
+  <select name="region">
+    <option value="">전체 지역</option>
+    <% regions.forEach(function (r) { %>
+      <option value="<%= r.k %>" <%= sel.region === r.k ? 'selected' : '' %>><%= r.k %> (<%= r.c %>)</option>
+    <% }) %>
+  </select>
+  <select name="industry">
+    <option value="">전체 업종</option>
+    <% industries.forEach(function (i) { %>
+      <option value="<%= i[0] %>" <%= sel.industry === i[0] ? 'selected' : '' %>><%= i[1] %></option>
+    <% }) %>
+  </select>
+  <select name="sort">
+    <option value="priority" <%= sel.sort === 'priority' ? 'selected' : '' %>>우선순위순</option>
+    <option value="fit" <%= sel.sort === 'fit' ? 'selected' : '' %>>적합도순</option>
+    <option value="demand" <%= sel.sort === 'demand' ? 'selected' : '' %>>요구수준순</option>
+  </select>
+  <button type="submit">적용</button>
+</form>
+
+<p class="muted small"><%= total.toLocaleString() %>개사 중 상위 <%= rows.length %>개 표시</p>
+
+<div class="card">
+<table class="mt-list">
+  <tr>
+    <th>기업</th><th>업종</th><th>지역</th>
+    <th class="num" title="업종이 중시하는 축에서 내가 얼마나 강한지">적합도</th>
+    <th class="num" title="그 업종이 요구하는 역량의 전반적 눈높이">요구</th>
+    <th class="num" title="눈높이가 높으면서도 내가 맞는 곳을 위로 올린 값">우선</th>
+    <th>가장 큰 격차</th>
+    <th class="no-print"></th>
+  </tr>
+  <% rows.forEach(function (r) { %>
+  <tr>
+    <td><a href="/matching/<%= r.corp_code %>"><%= r.corp_name %></a>
+      <% if (r.stock_code) { %><span class="muted small"><%= r.stock_code %></span><% } %></td>
+    <td class="muted small"><%= r.industry.label %></td>
+    <td class="muted small"><%= r.region || '-' %></td>
+    <td class="num"><span class="score s<%= Math.min(9, Math.floor(r.fit / 10)) %>"><%= r.fit %></span></td>
+    <td class="num muted small"><%= r.demand %></td>
+    <td class="num"><b><%= r.priority %></b></td>
+    <td class="small">
+      <% if (r.topGap) { %>
+        <span class="muted"><%= r.topGap.label %></span> <span class="gapnum">+<%= r.topGap.gap %></span>
+      <% } else { %><span class="muted">없음</span><% } %>
+    </td>
+    <td class="num no-print">
+      <form method="post" action="/cover/new">
+        <input type="hidden" name="corp_code" value="<%= r.corp_code %>">
+        <button class="ghost small" type="submit" title="이 기업 기준으로 자기소개서 초안 만들기">자소서</button>
+      </form>
+    </td>
+  </tr>
+  <% }) %>
+  <% if (!rows.length) { %><tr><td colspan="8" class="empty">조건에 맞는 기업이 없습니다.</td></tr><% } %>
+</table>
+</div>
+
+<div class="card note-box">
+  <p class="small" style="margin:0">
+    <b>업종 요구 프로필은 추정치입니다.</b> 공시자료에는 “이 회사가 어떤 역량을 원하는가”가 없어,
+    업종(한국표준산업분류 2자리)별로 직무 성격을 보고 정한 값을 씁니다.
+    납득되지 않는 업종은 <code>config/industry-weights.json</code> 에서 고치면 바로 반영됩니다.
+  </p>
+</div>
+<% } %>
+<%- include('partials/foot') %>

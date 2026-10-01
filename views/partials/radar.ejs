@@ -1,0 +1,68 @@
+<%
+/*
+ * 방사형(레이더) 차트.
+ * locals: axes(축 키 배열), meta(축 라벨), my(내 점수), want(기업 요구, 없으면 생략),
+ *         size(픽셀), myLabel, wantLabel
+ */
+/*
+ * 좌우 축 라벨('경영·리더십' 처럼 긴 글자)이 잘리지 않도록
+ * 그림 영역보다 viewBox 를 가로로 넓게 잡고 그 안에 차트를 가운데 둔다.
+ */
+var S = (typeof size !== 'undefined' ? size : 260);
+var PAD_X = 78;
+var PAD_Y = 22;
+var W = S + PAD_X * 2;
+var H = S + PAD_Y * 2;
+var R = S / 2 - 14;
+var cx = W / 2;
+var cy = H / 2;
+var n = axes.length;
+function pt(v, i, r) {
+  var a = (-90 + i * (360 / n)) * Math.PI / 180;
+  var rad = (r === undefined ? R : r) * (v / 100);
+  return [(cx + rad * Math.cos(a)).toFixed(1), (cy + rad * Math.sin(a)).toFixed(1)];
+}
+function poly(obj) {
+  return axes.map(function (k, i) { return pt(obj[k] || 0, i).join(','); }).join(' ');
+}
+%>
+<svg class="radar" viewBox="0 0 <%= W %> <%= H %>" width="<%= W %>" height="<%= H %>" role="img"
+     aria-label="역량 방사형 그래프">
+  <!-- 눈금 -->
+  <% [25, 50, 75, 100].forEach(function (lv) { %>
+    <polygon points="<%= axes.map(function (k, i) { return pt(lv, i).join(','); }).join(' ') %>"
+             fill="none" stroke="var(--line)" stroke-width="1" <%= lv === 100 ? '' : 'opacity="0.55"' %> />
+  <% }) %>
+  <!-- 축선 -->
+  <% axes.forEach(function (k, i) { %>
+    <line x1="<%= cx %>" y1="<%= cy %>" x2="<%= pt(100, i)[0] %>" y2="<%= pt(100, i)[1] %>"
+          stroke="var(--line)" stroke-width="1" opacity="0.55" />
+  <% }) %>
+
+  <!-- 기업 요구 -->
+  <% if (typeof want !== 'undefined' && want) { %>
+    <polygon points="<%= poly(want) %>" fill="var(--chart-2)" fill-opacity="0.16"
+             stroke="var(--chart-2)" stroke-width="1.5" stroke-dasharray="4 3" />
+  <% } %>
+
+  <!-- 내 역량 -->
+  <polygon points="<%= poly(my) %>" fill="var(--chart-1)" fill-opacity="0.22"
+           stroke="var(--chart-1)" stroke-width="2" />
+  <% axes.forEach(function (k, i) { var p = pt(my[k] || 0, i); %>
+    <circle cx="<%= p[0] %>" cy="<%= p[1] %>" r="3" fill="var(--chart-1)" />
+  <% }) %>
+
+  <!-- 축 이름 -->
+  <% axes.forEach(function (k, i) {
+       var p = pt(112, i);
+       var anchor = Math.abs(p[0] - cx) < 6 ? 'middle' : (p[0] > cx ? 'start' : 'end'); %>
+    <text x="<%= p[0] %>" y="<%= p[1] %>" text-anchor="<%= anchor %>" dy="4"
+          fill="var(--muted)" font-size="11"><%= meta[k].label %></text>
+  <% }) %>
+</svg>
+<div class="radar-legend">
+  <span><i class="sw mine"></i><%= typeof myLabel !== 'undefined' ? myLabel : '내 역량' %></span>
+  <% if (typeof want !== 'undefined' && want) { %>
+    <span><i class="sw want"></i><%= typeof wantLabel !== 'undefined' ? wantLabel : '업종 요구(추정)' %></span>
+  <% } %>
+</div>

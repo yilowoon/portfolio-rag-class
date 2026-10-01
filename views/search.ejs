@@ -1,0 +1,38 @@
+<%- include('partials/head') %>
+<h1>검색</h1>
+<p class="sub">키워드 전문검색(FTS5) + 임베딩이 있으면 의미검색을 함께 씁니다.</p>
+
+<form class="search" method="get" action="/search">
+  <input type="search" name="q" class="grow" value="<%= q %>" placeholder="검색어" autofocus>
+  <select name="org"><option value="">전체 조직</option>
+    <% facets.orgs.forEach(o => { %><option value="<%= o %>" <%= sel.org===o?'selected':'' %>><%= o %></option><% }) %>
+  </select>
+  <select name="type"><option value="">전체 유형</option>
+    <% facets.types.forEach(t => { %><option value="<%= t %>" <%= sel.docType===t?'selected':'' %>><%= t %></option><% }) %>
+  </select>
+  <select name="year"><option value="">전체 연도</option>
+    <% facets.years.forEach(y => { %><option value="<%= y %>" <%= String(sel.year)===String(y)?'selected':'' %>><%= y %></option><% }) %>
+  </select>
+  <button type="submit">검색</button>
+</form>
+
+<% if (error) { %><p class="err"><%= error %></p><% } %>
+
+<% if (q) { %>
+  <p class="muted small"><b><%= hits.length %></b>건<% if (hits.length && hits[0].sources) { %> · <%= hits[0].sources.join('+') %> 랭킹<% } %></p>
+  <div class="card">
+    <% if (!hits.length) { %>
+      <div class="empty">결과가 없습니다. 더 짧은 키워드나 다른 표현으로 시도해 보세요.</div>
+    <% } %>
+    <% hits.forEach(h => { %>
+      <div class="hit">
+        <div class="t"><a href="/doc/<%= h.doc_id %>?q=<%= encodeURIComponent(q) %>"><%= h.title %></a></div>
+        <div class="meta"><%= h.org || '-' %> · <%= h.doc_type || '-' %> · <%= h.year || '연도미상' %> · <%= h.ext %> · <span class="muted"><%= h.rel_path %></span></div>
+        <div class="snip"><%- h.snip %></div>
+      </div>
+    <% }) %>
+  </div>
+<% } else { %>
+  <div class="card empty">검색어를 입력하세요.</div>
+<% } %>
+<%- include('partials/foot') %>

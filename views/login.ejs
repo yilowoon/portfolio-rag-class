@@ -1,0 +1,13 @@
+<%- include('partials/head') %>
+<div style="max-width:380px;margin:14vh auto">
+  <h1>포트폴리오 DB</h1>
+  <p class="sub">비밀번호를 입력하세요.</p>
+  <form method="post" action="/login" class="card">
+    <input type="hidden" name="next" value="<%= next %>">
+    <label class="f">비밀번호</label>
+    <input type="password" name="password" class="grow" style="width:100%" autofocus>
+    <% if (error) { %><p class="err" style="margin:10px 0 0"><%= error %></p><% } %>
+    <div style="margin-top:14px"><button type="submit">들어가기</button></div>
+  </form>
+</div>
+<%- include('partials/foot') %>

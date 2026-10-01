@@ -1,0 +1,45 @@
+<%- include('partials/head') %>
+<h1>문서 목록</h1>
+<p class="sub">총 <b><%= total.toLocaleString() %></b>건 · <%= page %>/<%= Math.max(1, Math.ceil(total/per)) %> 페이지</p>
+
+<form class="search" method="get" action="/docs">
+  <select name="org"><option value="">전체 조직</option>
+    <% facets.orgs.forEach(o => { %><option value="<%= o %>" <%= sel.org===o?'selected':'' %>><%= o %></option><% }) %>
+  </select>
+  <select name="type"><option value="">전체 유형</option>
+    <% facets.types.forEach(t => { %><option value="<%= t %>" <%= sel.type===t?'selected':'' %>><%= t %></option><% }) %>
+  </select>
+  <select name="year"><option value="">전체 연도</option>
+    <% facets.years.forEach(y => { %><option value="<%= y %>" <%= String(sel.year)===String(y)?'selected':'' %>><%= y %></option><% }) %>
+  </select>
+  <select name="sort">
+    <option value="recent" <%= sel.sort==='recent'?'selected':'' %>>최신순</option>
+    <option value="size" <%= sel.sort==='size'?'selected':'' %>>분량순</option>
+    <option value="title" <%= sel.sort==='title'?'selected':'' %>>제목순</option>
+  </select>
+  <button type="submit">적용</button>
+</form>
+
+<div class="card">
+<table>
+  <tr><th>제목</th><th>조직</th><th>유형</th><th class="num">연도</th><th class="num">분량</th></tr>
+  <% rows.forEach(r => { %>
+  <tr>
+    <td><a href="/doc/<%= r.id %>"><%= r.title %></a>
+      <% if (r.status !== 'ok') { %> <span class="pill bad"><%= r.status %></span><% } %>
+      <span class="muted small"><%= r.ext %></span></td>
+    <td class="muted small"><%= r.org %></td>
+    <td class="muted small"><%= r.doc_type %></td>
+    <td class="num muted small"><%= r.year || '-' %></td>
+    <td class="num muted small"><%= r.text_chars ? Math.round(r.text_chars/1000)+'K' : '-' %></td>
+  </tr>
+  <% }) %>
+</table>
+</div>
+
+<% const qs = (p) => { const u = new URLSearchParams(sel); u.set('page', p); return '/docs?' + u.toString(); } %>
+<div class="row" style="margin-top:14px">
+  <% if (page > 1) { %><a class="btn ghost" href="<%= qs(page-1) %>">이전</a><% } %>
+  <% if (page * per < total) { %><a class="btn ghost" href="<%= qs(page+1) %>">다음</a><% } %>
+</div>
+<%- include('partials/foot') %>

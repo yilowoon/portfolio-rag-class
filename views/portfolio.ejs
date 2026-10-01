@@ -1,0 +1,100 @@
+<%- include('partials/head') %>
+
+<div class="pf-hero">
+  <div>
+    <h1>포트폴리오</h1>
+    <p class="sub">
+      <% if (cover.spanFrom) { %>
+        <strong><%= cover.spanFrom %></strong> ~ <strong><%= cover.spanTo %></strong>,
+        <strong><%= cover.spanTo - cover.spanFrom %>년</strong>간 축적한 활동 <strong><%= cover.total %></strong>건.
+      <% } else { %>
+        활동 <%= cover.total %>건.
+      <% } %>
+      기술에서 출발해 정책·창업·투자로 이어진 궤적을 분야별로 정리했습니다.
+    </p>
+  </div>
+  <a class="btn ghost no-print" href="/portfolio/new<%= cat ? '?cat=' + encodeURIComponent(cat) : '' %>">활동 추가</a>
+</div>
+
+<nav class="catbar">
+  <a href="/portfolio" class="cat <%= cat ? '' : 'on' %>">
+    <span class="c-ico">◈</span>
+    <span class="c-name">전체</span>
+    <span class="c-num"><%= cover.total %></span>
+  </a>
+  <% cats.forEach(function (c) { %>
+    <a href="/portfolio?cat=<%= encodeURIComponent(c.key) %>"
+       class="cat <%= cat === c.key ? 'on' : '' %> <%= c.count ? '' : 'empty' %>"
+       title="<%= c.desc %>">
+      <span class="c-ico"><%= c.icon %></span>
+      <span class="c-name"><%= c.key %></span>
+      <span class="c-num"><%= c.count %></span>
+    </a>
+  <% }) %>
+</nav>
+
+<% if (cat) { %>
+  <% var meta = cats.find(function (c) { return c.key === cat; }) || {}; %>
+  <p class="cat-desc"><%= meta.desc || '' %></p>
+<% } %>
+
+<% if (!groups.length) { %>
+  <div class="card empty-box">
+    <p class="eb-title"><%= cat || '이 분야' %>에 등록된 활동이 없습니다.</p>
+    <p class="muted small">
+      근거가 될 자료를 <code>myprofile/rawdata/</code> 폴더에 넣고 <code>npm run ingest</code> 를 실행한 뒤,
+      <a href="/portfolio/new<%= cat ? '?cat=' + encodeURIComponent(cat) : '' %>">활동 추가</a>로 항목을 만들면 됩니다.
+    </p>
+  </div>
+<% } %>
+
+<div class="tl">
+  <% groups.forEach(function (g) { %>
+    <section class="tl-group">
+      <div class="tl-year"><%= g.year %></div>
+      <div class="tl-items">
+        <% g.items.forEach(function (a) { %>
+          <article class="tl-card">
+            <div class="tc-head">
+              <span class="tc-cat"><%= a.icon %> <%= a.category %></span>
+              <span class="tc-period"><%= a.period %></span>
+            </div>
+            <h3 class="tc-title"><a href="/portfolio/<%= a.id %>"><%= a.title %></a></h3>
+            <div class="tc-org">
+              <% if (a.org) { %><strong><%= a.org %></strong><% } %>
+              <% if (a.role) { %><span class="muted"><%= a.org ? ' · ' : '' %><%= a.role %></span><% } %>
+            </div>
+            <% if (a.summary) { %><p class="tc-sum"><%= a.summary %></p><% } %>
+            <% if (a.outcomes) { %>
+              <ul class="tc-out">
+                <% a.outcomes.split(' / ').forEach(function (o) { %><li><%= o %></li><% }) %>
+              </ul>
+            <% } %>
+            <div class="tc-foot">
+              <% a.tagList.forEach(function (t) { %><span class="chip"><%= t %></span><% }) %>
+              <span class="right small <%= a.doc_count ? 'muted' : 'warnmuted' %>">
+                <%= a.doc_count ? '근거자료 ' + a.doc_count + '건' : '근거자료 없음' %>
+              </span>
+            </div>
+          </article>
+        <% }) %>
+      </div>
+    </section>
+  <% }) %>
+</div>
+
+<% if (cover.missing.length || cover.thin.length) { %>
+<div class="card gap-box no-print">
+  <h2 style="margin-top:0">보완이 필요한 부분</h2>
+  <% if (cover.missing.length) { %>
+    <p class="small"><span class="pill bad">자료 없음</span>
+      <%= cover.missing.join(', ') %> — 해당 분야 자료를 <code>myprofile/rawdata/</code> 에 넣고 다시 수집하세요.</p>
+  <% } %>
+  <% if (cover.thin.length) { %>
+    <p class="small"><span class="pill warn">근거 부족</span>
+      <%= cover.thin.join(', ') %> — 항목은 있으나 연결된 원본 자료가 없습니다.</p>
+  <% } %>
+</div>
+<% } %>
+
+<%- include('partials/foot') %>

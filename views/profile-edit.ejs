@@ -1,0 +1,74 @@
+<%- include('partials/head') %>
+<h1>프로필 편집</h1>
+<p class="sub">이력서에 표시되는 내용을 고칩니다. <a href="/profile">이력서 보기</a></p>
+
+<form method="post" action="/profile/basic" class="card">
+  <h2 style="margin-top:0">인적사항</h2>
+  <div class="grid c3">
+    <div><label class="f">이름</label><input type="text" name="name" style="width:100%" value="<%= me.name || '' %>"></div>
+    <div><label class="f">부가 표기(한자·본관)</label><input type="text" name="name_sub" style="width:100%" value="<%= me.name_sub || '' %>"></div>
+    <div><label class="f">생년월일</label><input type="text" name="birth" style="width:100%" value="<%= me.birth || '' %>"></div>
+    <div><label class="f">현 소속</label><input type="text" name="org" style="width:100%" value="<%= me.org || '' %>"></div>
+    <div><label class="f">직위</label><input type="text" name="position" style="width:100%" value="<%= me.position || '' %>"></div>
+    <div><label class="f">이메일</label><input type="text" name="email" style="width:100%" value="<%= me.email || '' %>"></div>
+    <div><label class="f">휴대전화</label><input type="text" name="phone" style="width:100%" value="<%= me.phone || '' %>"></div>
+    <div><label class="f">사무실</label><input type="text" name="office" style="width:100%" value="<%= me.office || '' %>"></div>
+    <div><label class="f">사진 경로(선택)</label><input type="text" name="photo" style="width:100%" value="<%= me.photo || '' %>"></div>
+  </div>
+  <label class="f">주소</label><input type="text" name="address" style="width:100%" value="<%= me.address || '' %>">
+  <label class="f">한 줄 소개</label><input type="text" name="headline" style="width:100%" value="<%= me.headline || '' %>">
+  <label class="f">핵심 역량 — 한 줄에 하나씩</label><textarea name="summary" style="min-height:120px"><%= me.summary || '' %></textarea>
+  <div class="row" style="margin-top:12px"><button type="submit">인적사항 저장</button></div>
+</form>
+
+<details class="card" style="margin-top:14px">
+  <summary>항목 추가 (경력·학력·자격)</summary>
+  <form method="post" action="/profile/item" style="margin-top:12px">
+    <div class="grid c3">
+      <div><label class="f">구분</label>
+        <select name="kind" style="width:100%"><% kinds.forEach(function (k) { %><option value="<%= k %>"><%= k %></option><% }) %></select></div>
+      <div><label class="f">제목</label><input type="text" name="title" style="width:100%" required></div>
+      <div><label class="f">기관</label><input type="text" name="org" style="width:100%"></div>
+      <div><label class="f">시작</label><input type="text" name="period_start" style="width:100%"></div>
+      <div><label class="f">종료</label><input type="text" name="period_end" style="width:100%"></div>
+      <div><label class="f">정렬순서</label><input type="text" name="sort_order" style="width:100%" value="0"></div>
+    </div>
+    <label class="f">설명</label><textarea name="description" style="min-height:56px"></textarea>
+    <div class="row" style="margin-top:12px"><button type="submit">추가</button></div>
+  </form>
+</details>
+
+<% kinds.forEach(function (k) {
+     var list = items.filter(function (i) { return i.kind === k; }); %>
+  <h2><%= k %> <span class="muted small">(<%= list.length %>)</span></h2>
+  <div class="card">
+    <% if (!list.length) { %><p class="muted small" style="margin:0">항목 없음</p><% } %>
+    <% list.forEach(function (it) { %>
+      <details class="item-row">
+        <summary><b><%= it.title %></b>
+          <span class="muted small"><%= it.org || '' %>
+            <%= [it.period_start, it.period_end].filter(Boolean).join(' ~ ') %></span></summary>
+        <form method="post" action="/profile/item" style="margin-top:10px">
+          <input type="hidden" name="id" value="<%= it.id %>">
+          <div class="grid c3">
+            <div><label class="f">구분</label>
+              <select name="kind" style="width:100%">
+                <% kinds.forEach(function (kk) { %><option value="<%= kk %>" <%= it.kind === kk ? 'selected' : '' %>><%= kk %></option><% }) %>
+              </select></div>
+            <div><label class="f">제목</label><input type="text" name="title" style="width:100%" value="<%= it.title %>"></div>
+            <div><label class="f">기관</label><input type="text" name="org" style="width:100%" value="<%= it.org || '' %>"></div>
+            <div><label class="f">시작</label><input type="text" name="period_start" style="width:100%" value="<%= it.period_start || '' %>"></div>
+            <div><label class="f">종료</label><input type="text" name="period_end" style="width:100%" value="<%= it.period_end || '' %>"></div>
+            <div><label class="f">정렬순서</label><input type="text" name="sort_order" style="width:100%" value="<%= it.sort_order %>"></div>
+          </div>
+          <label class="f">설명</label><textarea name="description" style="min-height:56px"><%= it.description || '' %></textarea>
+          <div class="row" style="margin-top:10px"><button type="submit">저장</button></div>
+        </form>
+        <form method="post" action="/profile/item/<%= it.id %>/delete" style="margin-top:8px" onsubmit="return confirm('삭제할까요?')">
+          <button class="danger" type="submit">삭제</button>
+        </form>
+      </details>
+    <% }) %>
+  </div>
+<% }) %>
+<%- include('partials/foot') %>
