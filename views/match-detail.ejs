@@ -99,23 +99,48 @@
 
   <div class="card">
     <h2 style="margin-top:0">재무 주요계정</h2>
-    <% if (!fin.length) { %>
+    <% if (!fin) { %>
       <p class="muted small" style="margin:0">
-        아직 받아오지 않았습니다. <code>npm run dart finance -- --year 2024</code> 로 채울 수 있습니다.
-        <br>상장사·IFRS 적용 비상장사만 제공됩니다.
+        공시된 재무자료가 없습니다. 상장폐지되었거나 사업보고서 제출 대상이 아닌 법인일 수 있습니다.
+        <br>아직 수집 전이라면 <code>npm run dart finance -- --year 2025</code> 로 받아올 수 있습니다.
       </p>
     <% } else { %>
-      <table class="rt">
-        <% fin.slice(0, 16).forEach(function (f) { %>
+      <%
+        var eok = function (v) {
+          if (v === null || v === undefined) return "-";
+          var e = v / 100000000;
+          if (Math.abs(e) >= 10000) return (e / 10000).toFixed(1) + "조";
+          if (Math.abs(e) >= 1) return Math.round(e).toLocaleString() + "억";
+          return Math.round(v / 10000).toLocaleString() + "만";
+        };
+      %>
+      <table class="fin">
         <tr>
-          <td class="rt-when"><%= f.bsns_year %>
-            <span class="fsdiv"><%= f.fs_div === 'CFS' ? '연결' : '개별' %></span></td>
-          <td class="rt-what"><%= f.account_nm %></td>
-          <td class="rt-note"><%= f.amount ? Number(String(f.amount).replace(/,/g, '')).toLocaleString() : '-' %></td>
+          <th>계정</th>
+          <% fin.years.forEach(function (y) { %><th class="num"><%= y %></th><% }) %>
+          <% if (fin.years.length > 1) { %><th class="num">증감</th><% } %>
+        </tr>
+        <% fin.accounts.forEach(function (a) { %>
+        <tr>
+          <td><%= a.name %></td>
+          <% a.cells.forEach(function (c) { %>
+            <td class="num <%= c && c.value < 0 ? 'neg' : '' %>"><%= c ? eok(c.value) : '-' %></td>
+          <% }) %>
+          <% if (fin.years.length > 1) { %>
+            <td class="num">
+              <% if (a.change === null) { %><span class="muted">-</span>
+              <% } else { %>
+                <span class="<%= a.change >= 0 ? 'up' : 'down' %>"><%= (a.change >= 0 ? '+' : '') + a.change.toFixed(1) %>%</span>
+              <% } %>
+            </td>
+          <% } %>
         </tr>
         <% }) %>
       </table>
-      <p class="muted small" style="margin:8px 0 0">단위: 원. 개별은 회사 단독, 연결은 종속회사 포함입니다.</p>
+      <p class="muted small" style="margin:10px 0 0">
+        <%= fin.basis %> 기준 · 억원 단위 · 출처 금융감독원 전자공시
+        <% if (fin.basis.indexOf('연결') >= 0) { %><br>연결은 종속회사를 포함한 수치입니다.<% } %>
+      </p>
     <% } %>
   </div>
 </div>

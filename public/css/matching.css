@@ -40,3 +40,32 @@ table.mt-list td { vertical-align: middle; }
 
 .fsdiv { display: inline-block; font-size: 10.5px; color: var(--muted);
   border: 1px solid var(--line); border-radius: 10px; padding: 0 6px; margin-left: 5px; }
+
+/* 재무 요약표 — 연도 × 주요계정 */
+table.fin { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+table.fin th { color: var(--muted); font-weight: 600; font-size: 12.5px;
+  padding: 6px 8px; border-bottom: 1px solid var(--line); }
+table.fin td { padding: 7px 6px; border-bottom: 1px solid var(--line);
+  font-variant-numeric: tabular-nums; }
+/* 금액·증감은 한 덩어리로 읽혀야 한다 — '3,301 / 억' 으로 쪼개지면 안 된다 */
+table.fin td.num, table.fin th.num { white-space: nowrap; }
+table.fin td:first-child { font-size: 13px; line-height: 1.35; }
+table.fin tr:last-child td { border-bottom: none; }
+table.fin tr:hover td { background: transparent; }
+table.fin td.neg { color: var(--bad); }
+table.fin .up { color: var(--ok); }
+table.fin .down { color: var(--bad); }
+
+/* 업종 요구 프로필 편집표 */
+table.wt { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.wt th { color: var(--muted); font-weight: 600; font-size: 12px; padding: 8px 6px;
+  border-bottom: 1px solid var(--line); white-space: nowrap; }
+table.wt td { padding: 5px 6px; border-bottom: 1px solid var(--line); }
+table.wt tr:last-child td { border-bottom: none; }
+table.wt .wt-name { min-width: 170px; }
+table.wt input[type=number] { width: 58px; padding: 4px 6px; text-align: right;
+  font-variant-numeric: tabular-nums; }
+table.wt .wt-fallback td { border-top: 2px solid var(--line); }
+.wt-save { position: sticky; bottom: 0; background: var(--bg);
+  padding: 12px 0; margin-top: 2px; border-top: 1px solid var(--line); }
+.okmsg { color: var(--ok); font-size: 13.5px; }

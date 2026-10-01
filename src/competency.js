@@ -275,4 +275,105 @@ function evaluate(company, my) {
   return { ...company, ...industryEval(company.induty_code, my) };
 }
 
-module.exports = { AXES, AXIS_META, myVector, industryOf, fitScore, gaps, tipsFor, evaluate, loadWeights };
+/*
+ * 가중치 표를 '업종 한 줄' 형식으로 직렬화한다.
+ * JSON.stringify(cfg, null, 2) 를 쓰면 w 객체가 줄마다 펼쳐져
+ * 70줄짜리 파일이 770줄이 되고, 한 값만 고쳐도 커밋 diff 가 전체로 번진다.
+ */
+function serializeWeights(cfg) {
+  const inline = (w) =>
+    "{ " + AXES.filter((a) => w[a] !== undefined).map((a) => `"${a}": ${w[a]}`).join(", ") + " }";
+  const q = (s) => JSON.stringify(s);
+  const out = [];
+
+  out.push("{");
+  for (const [k, v] of Object.entries(cfg)) {
+    if (k === "industries" || k === "_default" || k === "_axes") continue;
+    out.push(`  ${q(k)}: ${q(v)},`);
+  }
+  out.push(`  "_axes": [${AXES.map(q).join(", ")}],`);
+  out.push(`  "_default": {`);
+  out.push(`    "label": ${q(cfg._default.label)},`);
+  out.push(`    "w": ${inline(cfg._default.w)}`);
+  out.push(`  },`);
+  out.push(`  "industries": {`);
+  const codes = Object.keys(cfg.industries).sort();
+  codes.forEach((code, i) => {
+    const v = cfg.industries[code];
+    out.push(`    ${q(code)}: { "label": ${q(v.label)}, "w": ${inline(v.w)} }${i < codes.length - 1 ? "," : ""}`);
+  });
+  out.push(`  }`);
+  out.push("}");
+  return out.join("\n") + "\n";
+}
+
+/*
+ * 가중치 표 저장.
+ * config/industry-weights.json 을 그대로 다시 쓴다 — 파일이 계속 정본이고,
+ * 화면 편집은 그 파일을 고치는 또 하나의 방법일 뿐이다.
+ * (mtime 이 바뀌므로 loadWeights 캐시가 알아서 다시 읽는다)
+ */
+function saveWeights(updates) {
+  const cfg = JSON.parse(fs.readFileSync(WEIGHTS_PATH, "utf8"));
+  const clamp = (v) => Math.max(0, Math.min(100, Math.round(Number(v) || 0)));
+  let changed = 0;
+
+  for (const [code, w] of Object.entries(updates || {})) {
+    const target = code === "_default" ? cfg._default : cfg.industries[code];
+    if (!target) continue;
+    for (const a of AXES) {
+      if (w[a] === undefined || w[a] === "") continue;
+      const next = clamp(w[a]);
+      if (target.w[a] !== next) {
+        target.w[a] = next;
+        changed++;
+      }
+    }
+  }
+
+  if (changed) {
+    /*
+     * 원자적 쓰기.
+     * writeFileSync 는 파일을 비우고 다시 채우므로, 그 사이에 서버가 읽으면
+     * 비었거나 잘린 내용을 본다. 임시 파일에 다 쓴 뒤 rename 하면
+     * 읽는 쪽은 항상 이전 파일 아니면 새 파일을 보게 된다.
+     */
+    const tmp = WEIGHTS_PATH + ".tmp";
+    fs.writeFileSync(tmp, serializeWeights(cfg), "utf8");
+    fs.renameSync(tmp, WEIGHTS_PATH);
+    _weights = null; // 다음 읽기에서 새로 불러오도록
+    _weightsCheckedAt = 0;
+    _evalCache.clear();
+  }
+  return changed;
+}
+
+/* 편집 화면용 — 업종별 가중치에 해당 업종 기업 수를 붙여 돌려준다 */
+function industryList() {
+  const cfg = loadWeights();
+  let counts = new Map();
+  try {
+    counts = new Map(
+      db()
+        .prepare(
+          "SELECT substr(induty_code,1,2) k, COUNT(*) c FROM companies WHERE enriched_at IS NOT NULL AND induty_code IS NOT NULL GROUP BY k"
+        )
+        .all()
+        .map((r) => [r.k, r.c])
+    );
+  } catch (_) {}
+
+  const rows = Object.entries(cfg.industries).map(([code, v]) => ({
+    code,
+    label: v.label,
+    w: v.w,
+    companies: counts.get(code) || 0,
+  }));
+  rows.sort((a, b) => b.companies - a.companies || a.label.localeCompare(b.label, "ko"));
+  return { rows, fallback: { code: "_default", label: cfg._default.label, w: cfg._default.w, companies: 0 } };
+}
+
+module.exports = {
+  AXES, AXIS_META, myVector, industryOf, fitScore, gaps, tipsFor, evaluate,
+  loadWeights, saveWeights, industryList,
+};

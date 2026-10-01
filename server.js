@@ -457,15 +457,34 @@ app.get("/matching", (req, res) => {
   });
 });
 
+/*
+ * 업종 요구 프로필 편집.
+ * ':corp_code' 라우트보다 먼저 등록해야 'weights' 가 기업코드로 해석되지 않는다.
+ */
+app.get("/matching/weights", (req, res) => {
+  const list = comp.industryList();
+  res.render("weights", {
+    title: "업종 요구 프로필",
+    axes: comp.AXES,
+    meta: comp.AXIS_META,
+    rows: list.rows,
+    fallback: list.fallback,
+    saved: req.query.saved ? Number(req.query.saved) : null,
+  });
+});
+
+app.post("/matching/weights", (req, res) => {
+  const changed = comp.saveWeights(req.body.w || {});
+  res.redirect("/matching/weights?saved=" + changed);
+});
+
 app.get("/matching/:corp_code", (req, res) => {
   const d = db();
   const co = d.prepare("SELECT * FROM companies WHERE corp_code = ?").get(req.params.corp_code);
   if (!co) return res.status(404).send("없는 기업");
   const my = comp.myVector();
   const ev = comp.evaluate(co, my.score);
-  const fin = d
-    .prepare("SELECT bsns_year, account_nm, fs_div, amount FROM company_financials WHERE corp_code = ? ORDER BY bsns_year DESC, account_nm")
-    .all(co.corp_code);
+  const fin = stats.companyFinance(co.corp_code);
   res.render("match-detail", {
     title: co.corp_name,
     co, ev, my,

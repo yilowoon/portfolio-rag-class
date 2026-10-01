@@ -1,0 +1,83 @@
+<%- include('partials/head') %>
+<h1>업종 요구 프로필</h1>
+<p class="sub">
+  업종별로 어떤 역량을 얼마나 요구하는지를 0~100 으로 적어 둔 값입니다.
+  기업매칭의 적합도·우선순위가 이 표에 따라 달라집니다.
+</p>
+
+<div class="card note-box">
+  <p class="small" style="margin:0">
+    <b>이 값은 추정치입니다.</b> 공시자료에는 “이 회사가 어떤 역량을 원하는가”가 없어,
+    업종(한국표준산업분류 2자리)의 직무 성격을 보고 정한 값입니다.
+    현장을 아는 쪽이 고치는 편이 정확합니다 — 여기서 바꾸면 바로 반영됩니다.
+    <br>저장하면 <code>config/industry-weights.json</code> 파일이 갱신되므로, 다음 커밋에 함께 올라갑니다.
+  </p>
+</div>
+
+<% if (saved !== null) { %>
+  <p class="<%= saved > 0 ? 'okmsg' : 'muted small' %>">
+    <%= saved > 0 ? saved + '개 값을 저장했습니다. 기업매칭 점수가 다시 계산됩니다.' : '바뀐 값이 없습니다.' %>
+  </p>
+<% } %>
+
+<div class="row no-print" style="margin:16px 0 10px">
+  <input type="search" id="wfilter" placeholder="업종 이름으로 거르기" style="min-width:240px">
+  <span class="muted small">업종 <%= rows.length %>종 · 기업 수가 많은 순</span>
+  <a class="btn ghost right" href="/matching">기업매칭으로</a>
+</div>
+
+<form method="post" action="/matching/weights">
+  <div class="card">
+    <table class="wt">
+      <thead>
+        <tr>
+          <th class="wt-name">업종</th>
+          <th class="num">기업</th>
+          <% axes.forEach(function (a) { %>
+            <th class="num" title="<%= meta[a].desc %>"><%= meta[a].label %></th>
+          <% }) %>
+        </tr>
+      </thead>
+      <tbody>
+        <% rows.forEach(function (r) { %>
+          <tr data-name="<%= r.label %>">
+            <td class="wt-name"><%= r.label %> <span class="muted small"><%= r.code %></span></td>
+            <td class="num muted small"><%= r.companies ? r.companies.toLocaleString() : '-' %></td>
+            <% axes.forEach(function (a) { %>
+              <td class="num">
+                <input type="number" min="0" max="100" step="5"
+                       name="w[<%= r.code %>][<%= a %>]" value="<%= r.w[a] %>">
+              </td>
+            <% }) %>
+          </tr>
+        <% }) %>
+        <tr class="wt-fallback" data-name="기타 기본값">
+          <td class="wt-name"><%= fallback.label %> <span class="muted small">표에 없는 업종</span></td>
+          <td class="num muted small">-</td>
+          <% axes.forEach(function (a) { %>
+            <td class="num">
+              <input type="number" min="0" max="100" step="5"
+                     name="w[_default][<%= a %>]" value="<%= fallback.w[a] %>">
+            </td>
+          <% }) %>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="row wt-save no-print">
+    <button type="submit">저장</button>
+    <span class="muted small">바꾼 값만 저장됩니다. 0~100 범위를 벗어나면 잘립니다.</span>
+  </div>
+</form>
+
+<script>
+/* 업종이 63종이라 이름으로 좁혀 보는 편이 빠르다 */
+document.getElementById("wfilter").addEventListener("input", function (e) {
+  var q = e.target.value.trim();
+  document.querySelectorAll("table.wt tbody tr").forEach(function (tr) {
+    tr.style.display = !q || tr.dataset.name.indexOf(q) >= 0 ? "" : "none";
+  });
+});
+</script>
+<%- include('partials/foot') %>
