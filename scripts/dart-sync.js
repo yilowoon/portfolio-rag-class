@@ -13,6 +13,10 @@
  * 3단계 — 재무 주요계정 (100개사씩 묶어 호출)
  *   node scripts/dart-sync.js finance --year 2024 --region 대전
  *
+ * 4단계 — 매칭 대상이 아닌 기업 정리
+ *   node scripts/dart-sync.js clean --dry-run
+ *   node scripts/dart-sync.js clean
+ *
  * 확인
  *   node scripts/dart-sync.js status
  */
@@ -29,6 +33,7 @@ const val = (f, d) => {
 };
 const now = () => new Date().toISOString();
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const DRY = has("--dry-run");
 
 /* ── 1단계: 고유번호 ─────────────────────────── */
 async function syncCodes() {
@@ -67,6 +72,8 @@ async function enrich() {
   const where = ["enriched_at IS NULL"];
   const args = [];
   if (has("--listed")) where.push("stock_code IS NOT NULL AND stock_code != ''");
+  // SPAC 은 매칭 대상이 아니므로 애초에 받지 않는다(호출 수도 아낀다)
+  if (!has("--include-spac")) where.push("corp_name NOT LIKE '%기업인수목적%' AND corp_name NOT LIKE '%스팩%'");
   if (name) { where.push("corp_name LIKE ?"); args.push("%" + name + "%"); }
   if (has("--refresh")) where.shift();
 
@@ -168,6 +175,55 @@ async function finance() {
   console.log(`\n완료 — 계정 ${saved.toLocaleString()}건 저장 / API 호출 ${dart.calls()}회`);
 }
 
+/* ── 정리 ────────────────────────────────────── */
+/*
+ * 매칭 대상이 될 수 없는 기업을 지운다.
+ *
+ *  SPAC(기업인수목적회사) — 합병 전까지 실질 영업이 없다. 재무가 찍혀 있어도
+ *    공모자금이 자본금으로 잡힌 것뿐이라, 사람의 경력과 맞춰 볼 대상이 아니다.
+ *  폐업 추정 — 구분이 '기타법인'이면서 재무가 한 해도 없는 곳.
+ *
+ * 주의: 구분 'E' 를 전부 지우면 안 된다. 상장만 폐지되고 사업보고서는 계속 내는
+ * 영업 중인 회사(위노바·잘만테크 등 229곳)가 같은 구분에 들어 있다.
+ * 그래서 '재무가 하나도 없을 것' 을 함께 건다.
+ */
+const SPAC_SQL = "(corp_name LIKE '%기업인수목적%' OR corp_name LIKE '%스팩%')";
+const DEAD_SQL =
+  "(corp_cls = 'E' AND NOT EXISTS (SELECT 1 FROM company_financials f WHERE f.corp_code = companies.corp_code))";
+
+function clean() {
+  const d = db();
+  const where = `enriched_at IS NOT NULL AND (${SPAC_SQL} OR ${DEAD_SQL})`;
+  const spac = d.prepare(`SELECT COUNT(*) c FROM companies WHERE enriched_at IS NOT NULL AND ${SPAC_SQL}`).get().c;
+  const dead = d.prepare(`SELECT COUNT(*) c FROM companies WHERE enriched_at IS NOT NULL AND ${DEAD_SQL}`).get().c;
+  const total = d.prepare(`SELECT COUNT(*) c FROM companies WHERE ${where}`).get().c;
+  const keep = d.prepare(`SELECT COUNT(*) c FROM companies WHERE enriched_at IS NOT NULL AND NOT (${SPAC_SQL} OR ${DEAD_SQL})`).get().c;
+
+  console.log(`SPAC ${spac} / 폐업추정 ${dead} → 중복 제외 ${total}곳 삭제 대상`);
+  console.log(`남는 기업 ${keep.toLocaleString()}곳`);
+
+  if (DRY) {
+    console.log("");
+    console.log("표본:");
+    d.prepare(`SELECT corp_name, corp_cls FROM companies WHERE ${where} LIMIT 8`).all()
+      .forEach((r) => console.log(`  ${r.corp_name} (${r.corp_cls})`));
+    console.log("");
+    console.log("(--dry-run 이므로 지우지 않음)");
+    return;
+  }
+
+  d.exec("BEGIN");
+  try {
+    // company_financials 는 ON DELETE CASCADE 로 함께 지워진다
+    const r = d.prepare(`DELETE FROM companies WHERE ${where}`).run();
+    d.exec("COMMIT");
+    console.log(`삭제 완료 ${r.changes.toLocaleString()}곳`);
+  } catch (e) {
+    d.exec("ROLLBACK");
+    throw e;
+  }
+}
+
 /* ── 현황 ────────────────────────────────────── */
 function status() {
   const d = db();
@@ -199,9 +255,10 @@ function status() {
   if (cmd === "codes") await syncCodes();
   else if (cmd === "enrich") await enrich();
   else if (cmd === "finance") await finance();
+  else if (cmd === "clean") clean();
   else if (cmd === "status") status();
   else {
-    console.log("사용법: node scripts/dart-sync.js [codes|enrich|finance|status]");
+    console.log("사용법: node scripts/dart-sync.js [codes|enrich|finance|clean|status]");
     process.exit(1);
   }
 })().catch((e) => {
