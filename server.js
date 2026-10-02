@@ -504,12 +504,14 @@ app.get("/matching/:corp_code", (req, res) => {
   const my = comp.myVector();
   const ev = comp.evaluate(co, my.score);
   const fin = stats.companyFinance(co.corp_code);
+  const finNote = fin ? null : stats.financeAbsence(co);
   res.render("match-detail", {
     title: co.corp_name,
     co, ev, my,
     axes: comp.AXES, meta: comp.AXIS_META,
     tips: comp.tipsFor(ev.gaps),
     fin,
+    finNote,
   });
 });
 

@@ -101,4 +101,48 @@ function companyFinance(corpCode) {
   return { years, accounts, basis: bases.join("·") };
 }
 
-module.exports = { overview, byOrg, byType, byYear, recent, biggest, failures, redacted, companyFinance };
+/*
+ * 재무가 없을 때 그 사유를 밝힌다.
+ * "아직 수집 전이라면 명령을 실행하세요" 로 뭉뚱그리면,
+ * 아무리 수집해도 영원히 채워지지 않는 1,000여 곳에서 사용자가 헛수고를 한다.
+ */
+function financeAbsence(co) {
+  const name = String(co.corp_name || "");
+  const anyFinance = db().prepare("SELECT COUNT(*) c FROM company_financials").get().c > 0;
+
+  if (/기업인수목적|스팩|SPAC/i.test(name)) {
+    return {
+      kind: "spac",
+      text: "기업인수목적회사(SPAC)입니다. 합병 전까지 실질 영업이 없어 주요계정이 제공되지 않습니다.",
+    };
+  }
+  if (co.corp_cls === "E") {
+    return {
+      kind: "delisted",
+      text: "상장폐지되었거나 사업보고서 제출 대상이 아닌 법인입니다. 공시 자체가 없어 받아올 수 없습니다.",
+    };
+  }
+  const est = String(co.est_dt || "");
+  const estYear = est.length >= 4 ? Number(est.slice(0, 4)) : null;
+  if (estYear && estYear >= new Date().getFullYear() - 1) {
+    return {
+      kind: "new",
+      text: `${estYear}년에 설립되어 아직 사업보고서가 제출되지 않았습니다. 첫 결산 이후에 들어옵니다.`,
+    };
+  }
+  if (!anyFinance) {
+    return {
+      kind: "not-collected",
+      text: "아직 재무를 수집하지 않았습니다. `npm run dart finance -- --year 2025` 로 받아올 수 있습니다.",
+    };
+  }
+  return {
+    kind: "unavailable",
+    text: "해당 연도에 공시된 주요계정이 없습니다. 결산월이 12월이 아니거나 보고서 종류가 달라 빠졌을 수 있습니다.",
+  };
+}
+
+module.exports = {
+  overview, byOrg, byType, byYear, recent, biggest, failures, redacted,
+  companyFinance, financeAbsence,
+};

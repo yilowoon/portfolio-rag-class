@@ -69,3 +69,6 @@ table.wt .wt-fallback td { border-top: 2px solid var(--line); }
 .wt-save { position: sticky; bottom: 0; background: var(--bg);
   padding: 12px 0; margin-top: 2px; border-top: 1px solid var(--line); }
 .okmsg { color: var(--ok); font-size: 13.5px; }
+
+.fin-none { color: var(--muted); line-height: 1.7; }
+.fin-none .pill { margin-right: 6px; }

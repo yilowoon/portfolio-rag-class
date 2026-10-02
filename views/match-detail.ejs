@@ -100,9 +100,14 @@
   <div class="card">
     <h2 style="margin-top:0">재무 주요계정</h2>
     <% if (!fin) { %>
-      <p class="muted small" style="margin:0">
-        공시된 재무자료가 없습니다. 상장폐지되었거나 사업보고서 제출 대상이 아닌 법인일 수 있습니다.
-        <br>아직 수집 전이라면 <code>npm run dart finance -- --year 2025</code> 로 받아올 수 있습니다.
+      <p class="small fin-none" style="margin:0">
+        <span class="pill <%= finNote && finNote.kind === 'not-collected' ? 'warn' : '' %>">
+          <%= finNote && finNote.kind === 'spac' ? 'SPAC'
+              : finNote && finNote.kind === 'delisted' ? '공시 없음'
+              : finNote && finNote.kind === 'new' ? '신규 법인'
+              : finNote && finNote.kind === 'not-collected' ? '미수집' : '해당 없음' %>
+        </span>
+        <%- finNote ? finNote.text.replace(/`([^`]+)`/g, '<code>$1</code>') : '공시된 재무자료가 없습니다.' %>
       </p>
     <% } else { %>
       <%
