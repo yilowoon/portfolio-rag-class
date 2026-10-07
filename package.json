@@ -16,7 +16,8 @@
     "stats": "node scripts/stats.js",
     "index:activities": "node scripts/index-activities.js",
     "sync": "node scripts/sync.js",
-    "seed:sample": "node scripts/seed-sample.js"
+    "seed:sample": "node scripts/seed-sample.js",
+    "export:deck": "node scripts/export-deck.js"
   },
   "engines": {
     "node": ">=22.5.0"

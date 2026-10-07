@@ -21,3 +21,6 @@ myprofile/rawdata/*
 myprofile/photos/*
 !myprofile/rawdata/.gitkeep
 !myprofile/photos/.gitkeep
+
+# 외부 도구용 내보내기 산출물 — 개인정보가 담기므로 올리지 않는다
+deck/
