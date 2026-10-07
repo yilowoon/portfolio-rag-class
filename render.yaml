@@ -1,13 +1,19 @@
 # Render Blueprint — GitHub 저장소 연결 후 자동 구성
 #
-# 주의: 이 앱은 이력서(생년월일·주소·연락처)와 전체 경력을 그대로 보여준다.
-#       APP_PASSWORD 를 반드시 지정해야 하며, 비우면 누구나 열람할 수 있다.
+# 수업 시연용 배포다. 저장소에는 .db 파일이 없으므로(개인정보가 담기는 파일이라
+# .gitignore 대상) 빌드할 때 예시 프로필(김하늘)을 심는다. 그러지 않으면 빈 화면이 뜬다.
+#
+# 무료 플랜은 디스크가 임시다. 다시 뜰 때마다 빌드가 돌아 예시 데이터가 새로 깔리므로,
+# 화면에서 고친 내용은 남지 않는다. 시연용으로는 오히려 이쪽이 편하다.
+#
+# 본인 자료로 배포한다면 APP_PASSWORD 를 반드시 지정해야 한다.
+# 비우면 서비스가 503 으로 멈춘다(server.js 의 LOCKED).
 services:
   - type: web
-    name: profile-job
+    name: portfolio-rag-class
     runtime: node
     plan: free
-    buildCommand: npm install --omit=dev
+    buildCommand: npm install --omit=dev && npm run seed && npm run index:activities
     startCommand: node server.js
     autoDeploy: true
     envVars:

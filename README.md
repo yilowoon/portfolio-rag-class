@@ -596,6 +596,19 @@ FUNCTION_02_CALL_STUDIO() {
 [Render](https://render.com) 무료 플랜에 올릴 수 있습니다. `render.yaml` 이 들어 있어
 **New › Blueprint** 로 저장소를 고르면 설정이 자동으로 채워집니다.
 
+**저장소에는 `.db` 파일이 없습니다.** 개인정보가 담기는 파일이라 `.gitignore` 대상입니다.
+그래서 `render.yaml` 의 빌드 단계에서 예시 프로필을 심습니다 — 그러지 않으면 빈 화면이 뜹니다.
+
+```
+buildCommand: npm install --omit=dev && npm run seed && npm run index:activities
+```
+
+(이 `&&` 는 Render 의 리눅스 셸에서 도는 것이라 괜찮습니다. 내 컴퓨터의 PowerShell 과는 다릅니다.)
+
+본인 자료로 배포하려면 `seed-sample.js` 를 본인 내용으로 고치거나, `.db` 를 직접 올리도록
+`.gitignore` 를 바꿔야 합니다. **후자를 택하면 개인정보가 저장소에 그대로 들어간다는 뜻**이니
+저장소가 비공개인지 반드시 확인하세요.
+
 | 환경변수 | 필요성 | 비고 |
 | --- | --- | --- |
 | `APP_PASSWORD` | **필수** | 직접 입력. 없으면 서비스가 멈춤 |
