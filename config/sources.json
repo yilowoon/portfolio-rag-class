@@ -12,6 +12,11 @@
       "path": "rawdata",
       "org": "추가자료",
       "orgType": "본인"
+    },
+    {
+      "path": "photos",
+      "org": "활동사진",
+      "orgType": "본인"
     }
   ],
   "excludeDirs": [

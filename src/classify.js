@@ -56,6 +56,7 @@ function guessYear(fileName, relPath, mtimeMs) {
 /* 파일명을 사람이 읽을 제목으로 정돈 */
 function titleOf(fileName) {
   let t = fileName.replace(/\.[^.]+$/, "");
+  t = t.replace(/^\d{2}[_\-. ]/, "");   // 정렬용 번호(01_, 02_ …)는 제목에서 뺀다
   t = t.replace(/[_]+/g, " ");
   t = t.replace(/\s*\b(?:19|20)\d{6}\b\s*/g, " ");
   t = t.replace(/\s*[(\[]?\s*v?\d+\.\d+\s*[)\]]?\s*$/i, " ");

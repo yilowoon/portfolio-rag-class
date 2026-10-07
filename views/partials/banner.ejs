@@ -1,0 +1,123 @@
+<%
+/*
+ * 활동사진 롤링 배너.
+ * locals: banner (활동사진 문서 배열), me (인적사항)
+ *
+ * 한 장이 5초 머물고 1.2초에 걸쳐 다음 장으로 넘어간다.
+ * 머무는 동안 천천히 확대·이동(켄번스)해서 정지화면처럼 보이지 않게 한다.
+ *
+ * 사진 비율이 1.2~2.4 로 제각각이라 꽉 채우면(cover) 얼굴이 잘린다.
+ * 그래서 원본은 전부 보이게 두고(contain), 뒤에 같은 사진을 크게 흐려 깔아 여백을 메운다.
+ */
+var HOLD = 5000;   // 머무는 시간(ms)
+var FADE = 1200;   // 교차 전환 시간(ms)
+%>
+<section class="pbanner" aria-label="활동 사진" data-hold="<%= HOLD %>" data-fade="<%= FADE %>">
+  <div class="pb-stage">
+    <% banner.forEach(function (b, i) { %>
+      <div class="pb-slide <%= i === 0 ? 'on' : '' %>" data-kb="<%= i % 4 %>">
+        <div class="pb-bg" style="background-image:url('/doc/<%= b.id %>/raw')"></div>
+        <img class="pb-fg" src="/doc/<%= b.id %>/raw" alt="<%= b.title %>"
+             <%= i === 0 ? '' : 'loading="lazy"' %>>
+      </div>
+    <% }) %>
+
+    <div class="pb-veil" aria-hidden="true"></div>
+
+    <div class="pb-cap">
+      <div class="pb-name"><%= me.name || '' %><% if (me.position) { %> <span><%= me.position %></span><% } %></div>
+      <div class="pb-title" id="pbTitle"><%= banner[0] ? banner[0].title : '' %></div>
+    </div>
+
+    <div class="pb-dots" role="tablist" aria-label="사진 선택">
+      <% banner.forEach(function (b, i) { %>
+        <button type="button" class="pb-dot <%= i === 0 ? 'on' : '' %>" data-i="<%= i %>"
+                aria-label="<%= i + 1 %>번째 사진: <%= b.title %>"
+                aria-selected="<%= i === 0 ? 'true' : 'false' %>"><i></i></button>
+      <% }) %>
+    </div>
+
+    <div class="pb-bar" aria-hidden="true"><span id="pbBar"></span></div>
+  </div>
+</section>
+
+<script>
+(function () {
+  var box = document.querySelector(".pbanner");
+  if (!box) return;
+  var slides = [].slice.call(box.querySelectorAll(".pb-slide"));
+  var dots = [].slice.call(box.querySelectorAll(".pb-dot"));
+  var cap = document.getElementById("pbTitle");
+  var bar = document.getElementById("pbBar");
+  if (slides.length < 2) return;
+
+  var hold = Number(box.dataset.hold) || 5000;
+  var i = 0;
+  var timer = null;
+  /* 움직임을 줄이도록 설정한 사용자에게는 자동 전환도 확대효과도 걸지 않는다 */
+  var still = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (still) box.classList.add("pb-still");
+
+  function show(n) {
+    i = (n + slides.length) % slides.length;
+    slides.forEach(function (el, k) {
+      /* 클래스를 뗐다 붙여야 켄번스 애니메이션이 처음부터 다시 돈다 */
+      if (k === i) {
+        el.classList.remove("on");
+        void el.offsetWidth;
+        el.classList.add("on");
+      } else {
+        el.classList.remove("on");
+      }
+    });
+    dots.forEach(function (el, k) {
+      el.classList.toggle("on", k === i);
+      el.setAttribute("aria-selected", String(k === i));
+    });
+    if (cap) {
+      cap.textContent = slides[i].querySelector(".pb-fg").alt || "";
+      cap.classList.remove("in");
+      void cap.offsetWidth;
+      cap.classList.add("in");
+    }
+    restartBar();
+  }
+
+  function restartBar() {
+    if (!bar || still) return;
+    bar.style.transition = "none";
+    bar.style.width = "0%";
+    void bar.offsetWidth;
+    bar.style.transition = "width " + hold + "ms linear";
+    bar.style.width = "100%";
+  }
+  function freezeBar() {
+    if (!bar) return;
+    var w = getComputedStyle(bar).width;
+    bar.style.transition = "none";
+    bar.style.width = w;
+  }
+
+  function play() {
+    if (still || timer) return;
+    restartBar();
+    timer = setInterval(function () { show(i + 1); }, hold);
+  }
+  function stop() {
+    if (timer) { clearInterval(timer); timer = null; }
+    freezeBar();
+  }
+
+  dots.forEach(function (d) {
+    d.addEventListener("click", function () { stop(); show(Number(d.dataset.i)); play(); });
+  });
+  box.addEventListener("mouseenter", stop);
+  box.addEventListener("mouseleave", play);
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden) stop(); else play();
+  });
+
+  show(0);
+  play();
+})();
+</script>

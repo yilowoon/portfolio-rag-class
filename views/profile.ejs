@@ -5,6 +5,10 @@
   <button class="ghost" onclick="window.print()">인쇄 / PDF 저장</button>
 </div>
 
+<% if (banner && banner.length) { %>
+  <%- include('partials/banner', { banner: banner, me: me }) %>
+<% } %>
+
 <article class="resume">
 
   <header class="resume-head">

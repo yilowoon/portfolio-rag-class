@@ -181,3 +181,112 @@ table.rt tr:hover td { background: transparent; }
 .yc-table summary { color: var(--muted); font-size: 12.5px; }
 .yc-table table { margin-top: 8px; max-width: 280px; }
 .yc-table td, .yc-table th { padding: 4px 8px; font-size: 12.5px; }
+
+/* ══ 프로필 상단 활동사진 배너 ═══════════════════
+ * 5초 머물고 1.2초에 걸쳐 다음 장으로 넘어간다.
+ * 사진 비율이 1.2~2.4 로 제각각이라 꽉 채우면 얼굴이 잘린다.
+ * 원본은 전부 보이게 두고(contain), 같은 사진을 크게 흐려 뒤에 깔아 여백을 메운다.
+ */
+.pbanner { margin: 0 0 18px; }
+.pb-stage {
+  position: relative; width: 100%; aspect-ratio: 21 / 9;
+  border-radius: 12px; overflow: hidden;
+  background: #0b0d10; border: 1px solid var(--line);
+}
+@media (max-width: 640px) { .pb-stage { aspect-ratio: 4 / 3; } }
+
+/* 모든 장을 겹쳐 두고 투명도로만 바꾼다 — 레이아웃이 흔들리지 않는다 */
+.pb-slide {
+  position: absolute; inset: 0; opacity: 0;
+  transition: opacity 1.2s ease-in-out;
+}
+.pb-slide.on { opacity: 1; z-index: 1; }
+
+/* 여백 메우는 배경: 같은 사진을 넘치게 깔고 흐리게 + 어둡게 */
+.pb-bg {
+  position: absolute; inset: -8%;
+  background-size: cover; background-position: center;
+  filter: blur(26px) saturate(1.15) brightness(.5);
+  transform: scale(1.12);
+}
+/* 원본 — 잘리지 않게 전부 보여준다 */
+.pb-fg {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 22px rgba(0,0,0,.45));
+}
+
+/* 머무는 동안 천천히 확대·이동(켄번스)해서 정지화면처럼 보이지 않게 한다.
+ * 장마다 방향을 달리해(data-kb 0~3) 같은 움직임이 반복되지 않도록 한다. */
+.pb-slide.on .pb-fg { animation: pbKbA 6.4s ease-out both; }
+.pb-slide.on .pb-bg { animation: pbKbBg 6.4s ease-out both; }
+.pb-slide.on[data-kb="1"] .pb-fg { animation-name: pbKbB; }
+.pb-slide.on[data-kb="2"] .pb-fg { animation-name: pbKbC; }
+.pb-slide.on[data-kb="3"] .pb-fg { animation-name: pbKbD; }
+
+@keyframes pbKbA {   /* 가운데서 서서히 확대 */
+  from { transform: scale(1) translate3d(0,0,0); }
+  to   { transform: scale(1.09) translate3d(-1.2%, -1%, 0); }
+}
+@keyframes pbKbB {   /* 확대된 상태에서 서서히 물러남 */
+  from { transform: scale(1.09) translate3d(1.4%, 1%, 0); }
+  to   { transform: scale(1) translate3d(0,0,0); }
+}
+@keyframes pbKbC {   /* 오른쪽으로 밀면서 확대 */
+  from { transform: scale(1.03) translate3d(-2%, .6%, 0); }
+  to   { transform: scale(1.1) translate3d(1.6%, -.6%, 0); }
+}
+@keyframes pbKbD {   /* 아래에서 위로 */
+  from { transform: scale(1.1) translate3d(.6%, 2%, 0); }
+  to   { transform: scale(1.02) translate3d(-.6%, -1.4%, 0); }
+}
+@keyframes pbKbBg { /* 배경은 반대로 움직여 깊이감을 준다 */
+  from { transform: scale(1.18); }
+  to   { transform: scale(1.08); }
+}
+
+/* 아래쪽 글자가 읽히도록 어둡게 깐다 */
+.pb-veil {
+  position: absolute; inset: 0; pointer-events: none; z-index: 2;
+  background: linear-gradient(180deg, rgba(0,0,0,.28) 0%, rgba(0,0,0,0) 38%, rgba(0,0,0,.72) 100%);
+}
+.pb-cap { position: absolute; left: 20px; bottom: 18px; right: 110px; color: #fff; z-index: 3; }
+.pb-name { font-size: 17px; font-weight: 700; letter-spacing: -0.02em; text-shadow: 0 1px 3px rgba(0,0,0,.6); }
+.pb-name span { font-weight: 400; font-size: 13.5px; opacity: .85; margin-left: 6px; }
+.pb-title { font-size: 13px; opacity: .92; margin-top: 3px; text-shadow: 0 1px 3px rgba(0,0,0,.6); }
+.pb-title.in { animation: pbCap .7s cubic-bezier(.2,.7,.3,1) both; }
+@keyframes pbCap {
+  from { opacity: 0; transform: translateY(9px); filter: blur(2px); }
+  to   { opacity: .92; transform: none; filter: none; }
+}
+
+.pb-dots { position: absolute; right: 14px; bottom: 14px; display: flex; gap: 2px; z-index: 3; }
+.pb-dot {
+  width: 18px; height: 18px; padding: 0; border: none; background: none;
+  cursor: pointer; display: grid; place-items: center;
+}
+.pb-dot i {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: rgba(255,255,255,.4);
+  transition: background .25s, transform .25s;
+}
+.pb-dot:hover i { background: rgba(255,255,255,.8); }
+.pb-dot.on i { background: #fff; transform: scale(1.5); }
+
+/* 다음 장까지 남은 시간 */
+.pb-bar { position: absolute; left: 0; right: 0; top: 0; height: 2px; z-index: 3;
+  background: rgba(255,255,255,.14); }
+.pb-bar span { display: block; height: 100%; width: 0;
+  background: linear-gradient(90deg, var(--accent), #fff); }
+
+/* 움직임을 줄여달라고 설정한 사용자에게는 확대효과도 진행바도 끈다 */
+.pb-still .pb-slide.on .pb-fg,
+.pb-still .pb-slide.on .pb-bg { animation: none; }
+.pb-still .pb-bar { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  .pb-slide { transition: none; }
+  .pb-slide.on .pb-fg, .pb-slide.on .pb-bg, .pb-title.in { animation: none; }
+  .pb-bar { display: none; }
+}
+
+@media print { .pbanner { display: none; } }

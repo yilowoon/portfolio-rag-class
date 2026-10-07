@@ -368,6 +368,10 @@ app.get("/profile", (req, res) => {
       .prepare("SELECT * FROM projects WHERE tags LIKE '%특허%' OR tags LIKE '%실용신안%' ORDER BY COALESCE(period_start,'0') DESC")
       .all(),
     photoDoc: d.prepare("SELECT id FROM documents WHERE kind='media' AND file_name LIKE '%프로필%' LIMIT 1").get(),
+    // 상단 롤링 배너용 활동사진 (myprofile/photos/)
+    banner: d
+      .prepare("SELECT id, title FROM documents WHERE doc_type='활동사진' AND kind='media' ORDER BY file_name")
+      .all(),
   });
 });
 

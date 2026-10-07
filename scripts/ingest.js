@@ -186,7 +186,9 @@ async function main() {
     }
 
     if (f.kind === "media") {
-      upsert.run(f.full, rel, name, f.ext, f.org, f.orgType, titleOf(name), "이미지·미디어",
+      // photos/ 아래 이미지는 프로필 상단 롤링 배너에 쓴다
+      const mediaType = /(^|\/)photos\//.test(rel) ? "활동사진" : "이미지·미디어";
+      upsert.run(f.full, rel, name, f.ext, f.org, f.orgType, titleOf(name), mediaType,
         guessYear(name, rel, f.mtime), f.size, f.mtime, null, "media", "ok", null, 0, 0, null, new Date().toISOString());
       // 작은 이미지는 바이트째 DB 에 담는다 — 배포 환경에는 원본 폴더가 없기 때문
       const mid = getId.get(f.full).id;
